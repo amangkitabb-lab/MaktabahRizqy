@@ -46,7 +46,7 @@
         <div class="topbar-actions">
           <span class="demo-pill" id="demo-pill" hidden>PRATINJAU DEMO</span>
           <span class="privacy-label"><span class="privacy-dot"></span>DATA DI BROWSER</span>
-          <button type="button" id="theme-btn" class="icon-btn theme-btn" aria-label="Ubah mode tampilan" title="Ubah mode tampilan"><span data-icon="moon"></span></button>
+          <button type="button" id="theme-btn" class="icon-btn theme-btn" aria-label="Aktifkan mode gelap" title="Aktifkan mode gelap"><span data-icon="moon"></span><span class="theme-label">Mode gelap</span></button>
           <button type="button" id="add-btn" class="btn btn-primary"><span data-icon="plus"></span><span>Tambah Bacaan</span></button>
         </div>
       </header>
@@ -61,9 +61,10 @@
       <button type="button" data-nav="collection" class="bottom-link"><span data-icon="library"></span><span>Koleksi Ku</span></button>
     </nav>
   </div>
-  <input id="local-pdf-input" type="file" accept="application/pdf,.pdf" hidden aria-label="Pilih PDF dari perangkat"><input id="restore-file" type="file" accept="application/json,.json" hidden aria-label="Pilih cadangan koleksi"><div id="dialog-root"></div>
+  <input id="private-link-file" type="file" accept="application/json,.json" hidden aria-label="Impor tautan PDF Drive pribadi"><input id="local-pdf-input" type="file" accept="application/pdf,.pdf" hidden aria-label="Pilih PDF dari perangkat"><input id="restore-file" type="file" accept="application/json,.json" hidden aria-label="Pilih cadangan koleksi"><div id="dialog-root"></div>
   <div id="toast-root" role="status" aria-live="polite"></div>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer"></script>
+  <script src="./catalogue.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>

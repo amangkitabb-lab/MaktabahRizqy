@@ -1,4 +1,4 @@
-/* Maktabahrizqy GitHub Pages v0.3 — browser-local catalogue, no account, no server. */
+/* Maktabahrizqy GitHub Pages v0.4 — browser-local catalogue, no account, no server. */
 (() => {
   'use strict';
   const PREVIEW = true; // Reuse local-data operations; there is no backend in Pages edition.
@@ -45,7 +45,9 @@
     set: (key,value) => {memoryStore[key] = value;try {window.localStorage.setItem(key,value)} catch (_) {}},
   };
   const FANN = ['Belum Diklasifikasikan', 'Fiqh', 'Aqidah', 'Mantiq', 'Nahwu', 'Sharaf', 'Ushul Fiqh', 'Kaidah Fiqh', 'Tafsir', 'Hadis', 'Tasawuf', 'Akhlak', 'Doa & Wirid', 'Faraidh', 'Tajwid', 'Balaghah', 'Sejarah', 'Bahasa Arab', 'Lainnya'];
-  const demoBooks = [];
+  const demoBooks = Array.isArray(window.MAKTABAH_SEED_BOOKS) ? window.MAKTABAH_SEED_BOOKS : [];
+  const SEED_FLAG = 'maktabahrizqy_seed_v04';
+  const BOOKS_KEY = 'maktabahrizqy_browser_books_v1';
   const state = {
     preview: false,
     theme: storage.get('maktabah_theme') === 'dark' ? 'dark' : 'light',
@@ -54,13 +56,25 @@
   };
 
   const mockLoad = () => {
-    try {
-      const s = storage.get('maktabahrizqy_browser_books_v1');
-      if (s) { const parsed = JSON.parse(s); if (Array.isArray(parsed)) return parsed; }
-    } catch (_) {}
-    return demoBooks.map(x => ({...x}));
+    let saved=[];
+    try { const parsed=JSON.parse(storage.get(BOOKS_KEY) || '[]'); if(Array.isArray(parsed)) saved=parsed; } catch (_) {}
+    // Import the initial public shelf only once, preserving any pre-existing local books.
+    // Deleting an imported title will not bring it back on the next reload.
+    if (storage.get(SEED_FLAG) !== '1') {
+      const knownIds=new Set(saved.map(x=>x.id));
+      const key=x=>String(x.title||'').trim().toLocaleLowerCase('id-ID');
+      const knownTitles=new Set(saved.map(key));
+      const now=new Date().toISOString();
+      const fresh=demoBooks.filter(x=>!knownIds.has(x.id) && !knownTitles.has(key(x)))
+        .map(x=>({...x,author:x.author||'',pdf_url:'',cover_url:'',notes:'',total_pages:0,current_page:0,status:'belum',last_read_at:null,created_at:now,updated_at:now,drive_file_id:null}));
+      saved=[...saved,...fresh];
+      // First persist the catalogue, then mark migration completed.
+      storage.set(BOOKS_KEY,JSON.stringify(saved));
+      storage.set(SEED_FLAG,'1');
+    }
+    return saved;
   };
-  const mockSave = () => storage.set('maktabahrizqy_browser_books_v1', JSON.stringify(state.books));
+  const mockSave = () => storage.set(BOOKS_KEY, JSON.stringify(state.books));
   async function api(path, method='GET', data) {
     if (PREVIEW) {
       if (path === '/api/me') return {authenticated:true,configured:false,email:'',csrf:''};
@@ -140,6 +154,7 @@
       <section class="hero"><div class="hero-content"><div class="eyebrow">مكتبة رزقي • MAKTABAHRIZQY</div><h2 class="hero-title">Satu rak. <em>Seribu</em> pengetahuan.</h2><p class="hero-description">Simpan kitab dan buku pilihanmu. Kembali ke halaman terakhir, kapan pun kamu ingin melanjutkan.</p><button class="btn hero-action" type="button" data-nav="explore">Jelajahi Bacaan ${ico('arrow-right')}</button></div><div class="hero-art" aria-hidden="true"><div class="hero-card"><span class="arabic">اقرأ</span></div><span class="hero-vertical">READ · REFLECT · REMEMBER</span></div></section>
       <div class="stats">${stat('Total Koleksi',list.length,'Kitab & buku tercatat','layers')}${stat('Sedang Dibaca',underway.length,'Bacaan yang berjalan','book')}${stat('Selesai Dibaca',finished.length,'Bacaan tuntas','check')}${stat('Halaman Terbaca',pages.toLocaleString('id-ID'),'Terakumulasi di koleksi','clock')}</div>
       ${current?`<section class="section"><div class="section-head"><div><h2>Lanjutkan membaca</h2><p>Lanjut tepat dari tempat kamu berhenti.</p></div></div><div class="continue-panel">${coverMarkup(current)}<div class="continue-copy"><div class="eyebrow">BACAAN TERAKHIR</div><h3>${escape(current.title)}</h3><p>${escape(current.author||current.fann)}</p>${progressMarkup(current)}</div><button type="button" class="btn btn-primary" data-open="${escape(current.id)}">Lanjutkan ${ico('arrow-right')}</button></div></section>`:''}
+      <div class="catalogue-hint">Katalog awal diisi dari judul kitab dan buku yang teridentifikasi di arsip Drive. Tautan PDF tidak dipublikasikan. Untuk menautkan PDF secara pribadi, buka Jelajahi Bacaan lalu pilih Impor Tautan PDF.</div>
       <section class="section"><div class="section-head"><div><h2>${list.length?'Baru di rakmu':'Mulai membangun rakmu'}</h2><p>${list.length?'Bacaan yang terakhir kamu simpan atau perbarui.':'Semua kitab dan buku nantinya tersusun rapi di sini.'}</p></div>${list.length?`<button class="plain-link" data-nav="collection" type="button">Lihat Koleksi Ku ${ico('arrow-up-right')}</button>`:''}</div>${grid(latest)}</section>`;
   }
   function exploreMarkup() {
@@ -153,7 +168,7 @@
     return `${pageHeader('Jelajahi <em>Bacaan</em>','Cari judul, pengarang, atau fann. Semua bacaanmu ada di satu tempat.','TEMUKAN LAGI')}
       <div class="toolbar"><div class="search-wrap">${ico('search')}<input type="search" class="input-search" id="search-input" placeholder="Cari judul, pengarang, atau fann..." autocomplete="off" value="${escape(state.query)}" aria-label="Cari bacaan"></div><div class="search-count">${filtered.length} dari ${state.books.length} bacaan</div></div>
       <div class="filter-row">${fannValues.map(f=>`<button type="button" class="filter-chip ${f===state.category?'active':''}" data-category="${escape(f)}">${escape(f)}</button>`).join('')}</div>
-      <div class="section-head"><div><h2>Seluruh katalog</h2><p>${filtered.length} judul ditemukan · tersimpan pada perangkat ini</p></div><button type="button" class="plain-link" data-action="backup">${ico('download')} Ekspor Cadangan</button></div>
+      <div class="section-head"><div><h2>Seluruh katalog</h2><p>${filtered.length} judul ditemukan · tersimpan pada perangkat ini</p></div><div class="catalogue-actions"><button type="button" class="plain-link" data-action="import-drive-links">${ico('link')} Impor Tautan PDF</button><button type="button" class="plain-link" data-action="backup">${ico('download')} Ekspor Cadangan</button></div></div>
       ${filtered.length?grid(filtered):emptyMarkup(state.books.length?'search':'list')}`;
   }
   function collectionMarkup() {
@@ -185,8 +200,10 @@
     state.theme=value; document.body.dataset.theme=value;
     storage.set('maktabah_theme',value);
     const btn=$('#theme-btn');
-    btn.innerHTML=ico(value==='dark'?'sun':'moon');
-    btn.setAttribute('aria-label',value==='dark'?'Aktifkan mode terang':'Aktifkan mode gelap');
+    const label=value==='dark'?'Mode terang':'Mode gelap';
+    btn.innerHTML=ico(value==='dark'?'sun':'moon')+`<span class="theme-label">${label}</span>`;
+    btn.setAttribute('aria-label','Aktifkan '+label.toLowerCase());
+    btn.title='Aktifkan '+label.toLowerCase();
   }
   function renderLogin() { // GitHub Pages never uses login.
     toast('Login tidak digunakan pada versi GitHub Pages.');
@@ -332,6 +349,32 @@
       state.books=books;mockSave();clearDialog();renderBody();toast(`${books.length} bacaan berhasil dipulihkan di browser ini.`);
     }catch(e){toast(e.message||'Cadangan tidak dapat dibaca.');}
   }
+  async function importPrivateLinks(file) {
+    if(!file)return;
+    if(file.size>1024*1024){toast('Berkas tautan terlalu besar (maksimum 1 MB).');return;}
+    try {
+      const data=JSON.parse(await file.text());
+      if(data?.format!=='maktabahrizqy-private-drive-links'||data?.version!==1||!Array.isArray(data.links)||data.links.length>3000)throw new Error('Format tautan PDF tidak dikenali.');
+      const links=new Map();
+      for(const entry of data.links){
+        if(typeof entry?.id!=='string' || typeof entry?.pdf_url!=='string')continue;
+        const link=url(entry.pdf_url);
+        if(!link || new URL(link).hostname!=='drive.google.com' || !/^\/file\/d\//.test(new URL(link).pathname))continue;
+        links.set(entry.id,link);
+      }
+      const matches=state.books.filter(b=>links.has(b.id));
+      if(!matches.length){toast('Tidak ada judul yang cocok. Periksa apakah katalog awal sudah tersedia.');return;}
+      if(!window.confirm(`Tambahkan tautan PDF Drive untuk ${matches.length} judul di browser ini? Tautan tidak diunggah ke GitHub atau server.`))return;
+      let changed=0;
+      state.books=state.books.map(b=>{
+        const link=links.get(b.id);
+        if(!link || b.pdf_url)return b; // Preserve links set manually.
+        changed++;return {...b,pdf_url:link,updated_at:new Date().toISOString()};
+      });
+      mockSave();renderBody();toast(`${changed} tautan PDF tersimpan secara pribadi di browser ini.`);
+    }catch(e){toast(e.message||'Berkas tautan PDF tidak dapat dibaca.');}
+  }
+
   async function init() {
     setTheme(state.theme);
     $$('[data-icon]').forEach(el=>{el.innerHTML=ico(el.dataset.icon)});
@@ -364,6 +407,7 @@
     if(a==='add'){bookForm();return;}
     if(a==='retry'){init();return;}
     if(a==='backup'){exportBackup();return;}
+    if(a==='import-drive-links'){$('#private-link-file').click();return;}
     if(a==='open-local'&&b){state.pendingFileBookId=b.id;$('#local-pdf-input').click();return;}
     if(a==='edit'&&b){bookForm(b);return;}
     if(a==='read'&&b){await openReader(b);return;}
@@ -381,6 +425,9 @@
         state.books=state.books.map(x=>x.id===b.id?r.book:x);detail(r.book);renderBody();toast('Progres bacaan tersimpan.');}
       catch(e){toast(e.message);}return;
     }
+  });
+  $('#private-link-file').addEventListener('change',async event=>{
+    const file=event.target.files?.[0];event.target.value='';await importPrivateLinks(file);
   });
   $('#restore-file').addEventListener('change',async event=>{
     const file=event.target.files?.[0];event.target.value='';await importBackup(file);
