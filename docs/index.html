@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f7f5">
+  <meta name="description" content="Maktabahrizqy — perpustakaan kitab dan buku pribadi, tempat setiap bacaan punya jejak.">
+  <title>Maktabahrizqy — Perpustakaan Digital</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-theme="light">
+  <div id="app" class="app-shell">
+    <div id="mobile-shade" class="mobile-shade" aria-hidden="true"></div>
+    <aside id="sidebar" class="sidebar" aria-label="Navigasi perpustakaan">
+      <div class="brand-wrap">
+        <div class="brand-icon" aria-hidden="true">م</div>
+        <div>
+          <div class="brand-main">Maktabahrizqy</div>
+          <div class="brand-sub">PERPUSTAKAAN DIGITAL</div>
+        </div>
+      </div>
+      <div class="sidebar-kicker">MENU PERPUSTAKAAN</div>
+      <nav class="primary-nav" aria-label="Navigasi utama">
+        <button class="nav-link active" data-nav="home" type="button"><span class="nav-symbol" data-icon="home"></span><span>Web Utama</span></button>
+        <button class="nav-link" data-nav="explore" type="button"><span class="nav-symbol" data-icon="compass"></span><span>Jelajahi Bacaan</span></button>
+        <button class="nav-link" data-nav="collection" type="button"><span class="nav-symbol" data-icon="library"></span><span>Koleksi Ku</span></button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-note">
+        <div class="sidebar-note-icon" data-icon="bookmark"></div>
+        <span>Setiap halaman punya jejak. Setiap buku punya tempat.</span>
+      </div>
+      <div class="sidebar-account">
+        <div class="avatar">R</div>
+        <div class="sidebar-account-text"><strong>Rak Bacaan Lokal</strong><small id="sidebar-user">Tersimpan di browser ini</small></div>
+        <button type="button" class="icon-btn tiny" id="backup-btn" aria-label="Ekspor cadangan koleksi" title="Ekspor cadangan koleksi"><span data-icon="download"></span></button><button type="button" class="icon-btn tiny" id="restore-btn" aria-label="Impor cadangan koleksi" title="Impor cadangan koleksi"><span data-icon="upload"></span></button>
+      </div>
+      <div class="sidebar-version">MAKTABAHRIZQY <span>© 2026</span></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" id="menu-btn" class="icon-btn mobile-only" aria-label="Buka menu"><span data-icon="menu"></span></button>
+          <div class="breadcrumb"><span>PERPUSTAKAAN DIGITAL</span><span class="slash">/</span><b id="crumb-current">Web Utama</b></div>
+        </div>
+        <div class="topbar-actions">
+          <span class="demo-pill" id="demo-pill" hidden>PRATINJAU DEMO</span>
+          <span class="privacy-label"><span class="privacy-dot"></span>DATA DI BROWSER</span>
+          <button type="button" id="theme-btn" class="icon-btn theme-btn" aria-label="Ubah mode tampilan" title="Ubah mode tampilan"><span data-icon="moon"></span></button>
+          <button type="button" id="add-btn" class="btn btn-primary"><span data-icon="plus"></span><span>Tambah Bacaan</span></button>
+        </div>
+      </header>
+      <main id="content" class="content" tabindex="-1">
+        <div class="loading-state"><span class="loader"></span><p>Menyiapkan rak bacaanmu...</p></div>
+      </main>
+      <footer class="page-footer">Maktabahrizqy <span>— catatan bacaan tersimpan di browser perangkatmu; cadangkan secara berkala.</span></footer>
+    </div>
+    <nav class="bottom-nav" aria-label="Navigasi bawah">
+      <button type="button" data-nav="home" class="bottom-link active"><span data-icon="home"></span><span>Web Utama</span></button>
+      <button type="button" data-nav="explore" class="bottom-link"><span data-icon="compass"></span><span>Jelajahi Bacaan</span></button>
+      <button type="button" data-nav="collection" class="bottom-link"><span data-icon="library"></span><span>Koleksi Ku</span></button>
+    </nav>
+  </div>
+  <input id="local-pdf-input" type="file" accept="application/pdf,.pdf" hidden aria-label="Pilih PDF dari perangkat"><input id="restore-file" type="file" accept="application/json,.json" hidden aria-label="Pilih cadangan koleksi"><div id="dialog-root"></div>
+  <div id="toast-root" role="status" aria-live="polite"></div>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer"></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
