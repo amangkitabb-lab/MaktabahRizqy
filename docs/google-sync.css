@@ -14,3 +14,6 @@ body[data-theme="dark"] .cloud-panel{background:#222924;border-color:#455049;col
 body[data-theme="dark"] .cloud-panel-status{color:#bac4bd;}
 body[data-theme="dark"] .cloud-panel-actions button{border-color:#5d6b62;color:#e6efe9;}
 body[data-theme="dark"] .cloud-panel-actions button.cloud-login-main{background:#b4dec5;border-color:#b4dec5;color:#142c21;}
+/* Keep Google sign-in visible and allow the fixed sidebar to scroll on shorter screens. */
+.sidebar { overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; scrollbar-width: thin; }
+.cloud-panel { flex-shrink: 0; }
