@@ -619,7 +619,7 @@
   async function init() {
     setTheme(state.theme);
     setTextSize(state.textSize);
-    $('[data-icon]').forEach(el=>{el.innerHTML=ico(el.dataset.icon)});
+    $$('[data-icon]').forEach(el=>{el.innerHTML=ico(el.dataset.icon)});
     $('#demo-pill').hidden=true;
     try {
       state.me=await api('/api/me');
