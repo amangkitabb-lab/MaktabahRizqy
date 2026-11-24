@@ -1,4 +1,4 @@
-/* Maktabahrizqy Cloud Sync v0.5: Google Identity Services + private Drive appDataFolder.
+/* Maktabahrizqy Cloud Sync v0.7: Google Identity Services + private Drive appDataFolder.
  * OAuth access tokens only live in memory. No server, database, or client secret.
  */
 (() => {
@@ -72,7 +72,9 @@
 
   function isDefaultSeed(b) {
     if (!String(b?.id || '').startsWith('mb-')) return false;
-    return !b.pdf_url && !b.cover_url && !b.author && !b.notes && !Number(b.current_page) && !Number(b.total_pages) && (!b.status || b.status === 'belum');
+    return !b.pdf_url && !b.cover_url && !b.author && !b.notes && !Number(b.current_page) && !Number(b.total_pages) && Number(b.total_volumes || 1) === 1 &&
+      !Object.values(b.volume_progress||{}).some(p=>Number(p?.page)>0||Number(p?.total_pages)>0) &&
+      (!b.status || b.status === 'belum');
   }
 
   function mergeBooks(local, remote) {
@@ -107,7 +109,8 @@
         merged.status = older.status;
         merged.last_read_at = older.last_read_at;
       }
-      output.set(b.id, merged);
+      const withJilid=window.MAKTABAH_VOLUMES ? window.MAKTABAH_VOLUMES.mergeVolumes(older,newer,merged) : merged;
+      output.set(b.id, withJilid);
     }
     const deleted = Object.create(null);
     for (const source of [remote.deleted, local.deleted]) {

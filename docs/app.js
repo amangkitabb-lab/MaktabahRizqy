@@ -1,4 +1,4 @@
-/* Maktabahrizqy GitHub Pages v0.6 — private PDF links and hybrid cover manager. */
+/* Maktabahrizqy GitHub Pages v0.7 — full portrait covers and per-juz/jilid progress. */
 (() => {
   'use strict';
   const PREVIEW = true; // Reuse local-data operations; there is no backend in Pages edition.
@@ -85,7 +85,7 @@
       storage.set(BOOKS_KEY,JSON.stringify(saved));
       storage.set(SEED_FLAG,'1');
     }
-    return saved;
+    return saved.map(b=>window.MAKTABAH_VOLUMES?.normalize(b)||b);
   };
   const mockSave = () => {
     const stored=storage.set(BOOKS_KEY, JSON.stringify(state.books));
@@ -100,19 +100,15 @@
       if (path === '/api/logout') return {ok:true};
       const match = path.match(/^\/api\/books\/([^/]+)(\/progress)?$/);
       if (method === 'POST' && path === '/api/books') {
-        const book={...data,id:'lokal-'+(crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(36).slice(2)),current_page:0,status:'belum',drive_file_id:null,last_read_at:null,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+        const now=new Date().toISOString();
+        const book=window.MAKTABAH_VOLUMES.normalize({...data,id:'lokal-'+(crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(36).slice(2)),status:Number(data.current_page)?'sedang':'belum',drive_file_id:null,last_read_at:Number(data.current_page)?now:null,created_at:now,updated_at:now});
         state.books.unshift(book); mockSave(); return {book};
       }
       if (match) {
         const b=state.books.find(x=>x.id===match[1]);
         if (!b) throw new Error('Bacaan tidak ditemukan.');
         if (method==='PATCH') Object.assign(b,data,{updated_at:new Date().toISOString()});
-        if (method==='POST' && match[2]) {
-          b.current_page=data.source==='auto'?Math.max(b.current_page||0,Number(data.page)||0):Number(data.page)||0;
-          b.status= b.current_page===0?'belum':(b.total_pages && b.current_page>=b.total_pages?'selesai':'sedang');
-          b.last_read_at=b.current_page?new Date().toISOString():null;
-          b.updated_at=new Date().toISOString();
-        }
+        if (method==='POST' && match[2]) Object.assign(b,window.MAKTABAH_VOLUMES.savePage(b,{volume:data.volume,page:data.page,source:data.source}));
         if (method==='DELETE') { recordDeleted(b.id); state.books=state.books.filter(x=>x.id!==b.id); }
         mockSave();return {book:b,ok:true};
       }
@@ -138,8 +134,15 @@
     const node=document.createElement('div');node.className='toast';node.textContent=message;
     $('#toast-root').appendChild(node);setTimeout(()=>node.remove(),4100);
   }
-  function progressPct(book) {return book.total_pages > 0 ? Math.min(100,Math.max(0,Math.round(100 * book.current_page / book.total_pages))) : 0;}
-  function progressMarkup(book) {const pct=progressPct(book);return `<div class="progress-rail"><progress value="${pct}" max="100" aria-label="Progres ${pct} persen"></progress></div><div class="progress-row"><span>${book.current_page?`Hal. ${book.current_page} ${book.total_pages?'/ '+book.total_pages:''}`:'Belum dimulai'}</span><span>${pct}%</span></div>`;}
+  function progressPct(book) {return window.MAKTABAH_VOLUMES?.percentage(book)||0;}
+  function progressMarkup(book) {
+    const n=window.MAKTABAH_VOLUMES.normalize(book);
+    const pct=progressPct(n);
+    const volume=n.total_volumes>1?'Juz/Jilid '+n.current_volume+'/'+n.total_volumes+' · ':'';
+    const page=n.current_page?'Hal. '+n.current_page+(n.total_pages?' / '+n.total_pages:''):'Belum dimulai';
+    const percentLabel=n.total_volumes>1?'Progres seluruh jilid '+pct+' persen':'Progres '+pct+' persen';
+    return `<div class="progress-rail"><progress value="${pct}" max="100" aria-label="${escape(percentLabel)}"></progress></div><div class="progress-row"><span>${escape(volume+page)}</span><span>${pct}%</span></div>`;
+  }
   function coverMarkup(book, extra='') {
     const tone=[...book.title].reduce((a,c)=>a+c.charCodeAt(0),0)%6;
     const image = window.MAKTABAH_COVERS?.coverSrc(book) || url(book.cover_url) || '';
@@ -162,7 +165,7 @@
     const list=state.books;
     const underway=list.filter(x=>x.status==='sedang');
     const finished=list.filter(x=>x.status==='selesai');
-    const pages=list.reduce((a,b)=>a+(Number(b.current_page)||0),0);
+    const pages=list.reduce((sum,b)=>sum+Object.values(window.MAKTABAH_VOLUMES.entriesOf(b)).reduce((v,p)=>v+(Number(p.page)||0),0),0);
     const recent=[...underway].sort((a,b)=>(b.last_read_at||'').localeCompare(a.last_read_at||''));
     const current=recent[0];
     const latest=[...list].sort((a,b)=>(b.updated_at||'').localeCompare(a.updated_at||'')).slice(0,4);
@@ -245,7 +248,9 @@
   const fannOptions=(current)=>FANN.map(f=>`<option value="${escape(f)}" ${f===current?'selected':''}>${escape(f)}</option>`).join('');
   function bookForm(book=null) {
     const edit=!!book;
-    const b=book||{title:'',author:'',kind:'kitab',fann:'Belum Diklasifikasikan',total_pages:0,pdf_url:'',cover_url:'',notes:'',status:'belum'};
+    const b=window.MAKTABAH_VOLUMES.normalize(book||{title:'',author:'',kind:'kitab',fann:'Belum Diklasifikasikan',total_pages:0,pdf_url:'',cover_url:'',notes:'',status:'belum'});
+    state.volumeFormDraft=b;
+    state.volumeFormSelected=b.current_volume;
     state.dialog={type:'form',id:book?.id||null};
     $('#dialog-root').innerHTML=`<div class="modal-shade" data-dismiss="true"><div class="modal" role="dialog" aria-modal="true" aria-label="${edit?'Ubah':'Tambah'} Bacaan"><div class="modal-top"><div><div class="eyebrow">KATALOG DI PERANGKAT</div><h2 class="modal-title">${edit?'Ubah data bacaan':'Tambah bacaan baru'}</h2><p class="modal-sub">Judul wajib diisi. Sampul dan PDF boleh menyusul.</p></div><button class="icon-btn" data-action="close" type="button" aria-label="Tutup">${ico('x')}</button></div>
       <form id="book-form"><div class="form-grid">
@@ -253,7 +258,12 @@
         <div class="field"><label for="book-author">Pengarang</label><input id="book-author" name="author" maxlength="200" value="${escape(b.author)}" placeholder="Nama pengarang"></div>
         <div class="field"><label for="book-kind">Jenis bacaan</label><select id="book-kind" name="kind"><option value="kitab" ${b.kind==='kitab'?'selected':''}>Kitab</option><option value="buku" ${b.kind==='buku'?'selected':''}>Buku Bacaan</option></select></div>
         <div class="field"><label for="book-fann">Fann / kategori</label><select id="book-fann" name="fann">${fannOptions(b.fann)}</select></div>
-        <div class="field"><label for="book-total">Jumlah halaman</label><input id="book-total" name="total_pages" type="number" min="0" max="100000" value="${Number(b.total_pages)||0}"></div>
+        <div class="field wide volume-form-label">Pengaturan Juz / Jilid <span>untuk kitab mujallad dan buku berseri</span></div>
+        <div class="field"><label for="book-volume-total">Jumlah Juz / Jilid</label><input id="book-volume-total" name="total_volumes" type="number" min="1" max="999" step="1" value="${b.total_volumes}"></div>
+        <div class="field"><label for="book-volume-active">Juz / Jilid yang dibaca</label><input id="book-volume-active" name="current_volume" type="number" min="1" max="${b.total_volumes}" step="1" value="${b.current_volume}"></div>
+        <div class="field"><label for="book-total">Jumlah halaman <span class="volume-number-label">Juz / Jilid ${b.current_volume}</span></label><input id="book-total" name="total_pages" type="number" min="0" max="100000" value="${Number(b.total_pages)||0}"></div>
+        <div class="field"><label for="book-page">Halaman terakhir <span class="volume-number-label">Juz / Jilid ${b.current_volume}</span></label><input id="book-page" name="current_page" type="number" min="0" max="${b.total_pages||100000}" value="${Number(b.current_page)||0}"></div>
+        <div class="field wide"><small class="field-hint">Halaman terakhir disimpan terpisah untuk tiap juz/jilid. Jika berganti jilid, nomor halaman jilid sebelumnya tetap tersimpan.</small></div>
         <div class="field wide"><label for="book-pdf">Tautan PDF (opsional)</label><input id="book-pdf" name="pdf_url" type="url" maxlength="1500" value="${escape(b.pdf_url)}" placeholder="https://drive.google.com/file/d/..."><span class="field-hint">Progres otomatis saat PDF berhasil ditampilkan di pembaca web. Untuk Google Drive privat gunakan halaman manual atau pilih PDF dari perangkat.</span></div>
         <div class="field wide"><label for="book-cover">Tautan gambar sampul (opsional)</label><input id="book-cover" name="cover_url" type="url" maxlength="1500" value="${escape(url(b.cover_url))}" placeholder="https://.../cover.jpg"><span class="field-hint">Cover lokal / halaman pertama PDF: simpan bacaan lalu buka Detail → Kelola Cover. Cover tersimpan pribadi di browser dan ikut sinkron Google jika login.</span></div>
         <div class="field wide"><label for="book-notes">Catatan pribadi</label><textarea id="book-notes" name="notes" maxlength="4000" placeholder="Catatan singkat tentang bacaan ini...">${escape(b.notes)}</textarea></div>
@@ -261,8 +271,36 @@
       </div><div class="modal-actions"><button type="button" data-action="close" class="btn btn-ghost">Batal</button><button type="submit" class="btn btn-primary">${ico('check')} ${edit?'Simpan Perubahan':'Tambah ke Koleksi'}</button></div></form></div></div>`;
     setTimeout(()=>$('#book-title')?.focus(),80);
   }
+  function stashFormVolume() {
+    if(!state.volumeFormDraft)return false;
+    const total=Number($('#book-total')?.value||0);
+    const page=Number($('#book-page')?.value||0);
+    if(!Number.isInteger(total)||total<0||total>100000||!Number.isInteger(page)||page<0||page>100000||(total&&page>total)){
+      toast('Nomor halaman tidak valid untuk juz/jilid ini.');
+      return false;
+    }
+    state.volumeFormDraft=window.MAKTABAH_VOLUMES.setActive(state.volumeFormDraft,{
+      current_volume:state.volumeFormSelected,total_pages:total,page
+    });
+    return true;
+  }
+  function selectFormVolume(number,volumeTotal) {
+    const m=window.MAKTABAH_VOLUMES;
+    const count=Math.max(1,Math.min(999,Math.floor(Number(volumeTotal)||1)));
+    const vol=Math.max(1,Math.min(count,Math.floor(Number(number)||1)));
+    state.volumeFormDraft=m.setActive(state.volumeFormDraft,{total_volumes:count,current_volume:vol});
+    state.volumeFormSelected=vol;
+    $('#book-volume-active').max=String(count);
+    $('#book-volume-active').value=String(vol);
+    $('#book-volume-total').value=String(count);
+    $('#book-total').value=String(state.volumeFormDraft.total_pages||0);
+    $('#book-page').value=String(state.volumeFormDraft.current_page||0);
+    $('#book-page').max=String(state.volumeFormDraft.total_pages||100000);
+    $('.volume-number-label').forEach(el=>el.textContent='Juz / Jilid '+vol);
+  }
   function detail(book) {
     if (!book) return;
+    book=window.MAKTABAH_VOLUMES.normalize(book);
     state.dialog={type:'detail',id:book.id};
     const links=[];
     const external=url(book.pdf_url);
@@ -280,8 +318,8 @@
       </div>
       <small>Cover dibuat ringkas dan tersimpan bersama catatan di browser; jika login Google aktif, cover pilihan ikut tersinkron melalui Drive aplikasi. Tidak ada PDF asli yang diunggah.</small>
     </section>`;
-    $('#dialog-root').innerHTML=`<div class="modal-shade" data-dismiss="true"><div class="modal" role="dialog" aria-modal="true" aria-label="Detail ${escape(book.title)}"><div class="modal-top"><div class="eyebrow">DETAIL BACAAN</div><button type="button" class="icon-btn" data-action="close" aria-label="Tutup">${ico('x')}</button></div><div class="detail-layout">${coverMarkup(book)}<div><div class="detail-topline">${escape(book.kind==='buku'?'BUKU BACAAN':'KITAB · FANN '+book.fann)}</div><h2 class="detail-name">${escape(book.title)}</h2><div class="detail-author">${escape(book.author||'Pengarang belum dicatat')}</div><div class="detail-chips"><span class="detail-chip">${escape(book.status==='belum'?'Belum dibaca':book.status==='sedang'?'Sedang dibaca':'Selesai')}</span><span class="detail-chip">${book.total_pages?'Total '+book.total_pages+' halaman':'Halaman belum diketahui'}</span></div>${progressMarkup(book)}${book.notes?`<p class="detail-note">${escape(book.notes)}</p>`:''}<div class="detail-actions">${links.join('')}</div><p class="field-hint">PDF tidak diunggah ke situs. Progres otomatis berlaku hanya jika PDF berhasil dirender di sini; pembukaan tautan eksternal tidak dapat dilacak.</p></div></div>
-    <div class="detail-progress"><h4>Tandai halaman terakhir secara manual</h4><div class="progress-inline"><span>Halaman</span><input type="number" id="manual-page" min="0" max="${book.total_pages||100000}" value="${book.current_page}" aria-label="Halaman terakhir dibaca"><span>${book.total_pages?'dari '+book.total_pages+' halaman':'belum ada total halaman'}</span><button type="button" class="btn btn-secondary" data-action="save-progress" data-id="${escape(book.id)}">${ico('check')} Simpan Progres</button></div></div>
+    $('#dialog-root').innerHTML=`<div class="modal-shade" data-dismiss="true"><div class="modal" role="dialog" aria-modal="true" aria-label="Detail ${escape(book.title)}"><div class="modal-top"><div class="eyebrow">DETAIL BACAAN</div><button type="button" class="icon-btn" data-action="close" aria-label="Tutup">${ico('x')}</button></div><div class="detail-layout">${coverMarkup(book)}<div><div class="detail-topline">${escape(book.kind==='buku'?'BUKU BACAAN':'KITAB · FANN '+book.fann)}</div><h2 class="detail-name">${escape(book.title)}</h2><div class="detail-author">${escape(book.author||'Pengarang belum dicatat')}</div><div class="detail-chips"><span class="detail-chip">${escape(book.status==='belum'?'Belum dibaca':book.status==='sedang'?'Sedang dibaca':'Selesai')}</span><span class="detail-chip">${book.total_pages?'Total '+book.total_pages+' halaman':'Halaman belum diketahui'}</span>${book.total_volumes>1?`<span class="detail-chip">Juz/Jilid ${book.current_volume} dari ${book.total_volumes}</span>`:''}</div>${progressMarkup(book)}${book.notes?`<p class="detail-note">${escape(book.notes)}</p>`:''}<div class="detail-actions">${links.join('')}</div><p class="field-hint">PDF tidak diunggah ke situs. Progres otomatis berlaku hanya jika PDF berhasil dirender di sini; pembukaan tautan eksternal tidak dapat dilacak.</p></div></div>
+    <div class="detail-progress"><h4>Tandai juz / jilid dan halaman terakhir</h4><div class="progress-inline volume-progress-inline"><label for="manual-volume">Juz / Jilid</label><input type="number" id="manual-volume" min="1" max="${book.total_volumes}" step="1" value="${book.current_volume}" aria-label="Nomor juz atau jilid"><span>dari ${book.total_volumes}</span><label for="manual-page">Halaman</label><input type="number" id="manual-page" min="0" max="${book.total_pages||100000}" value="${book.current_page}" aria-label="Halaman terakhir dibaca"><span id="manual-page-hint">${book.total_pages?'dari '+book.total_pages+' halaman':'belum ada total halaman'}</span><button type="button" class="btn btn-secondary" data-action="save-progress" data-id="${escape(book.id)}">${ico('check')} Simpan Progres</button></div><small class="field-hint">Pindah Juz / Jilid untuk melihat atau mencatat halaman terakhir pada jilid tersebut.</small></div>
     ${coverTools}<div class="modal-actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="${escape(book.id)}">${ico('trash')} Hapus dari Katalog</button><button type="button" class="btn btn-secondary" data-action="edit" data-id="${escape(book.id)}">${ico('edit')} Ubah Data</button></div></div></div>`;
   }
   function saveChosenCover(book, cover, pages=0) {
@@ -291,7 +329,7 @@
     const current=prior.find(x=>x.id===book.id);
     if(!current) throw new Error('Bacaan tidak ditemukan.');
     const updated={...current,cover_url:cover,updated_at:new Date().toISOString()};
-    if(pages && !updated.total_pages)updated.total_pages=pages;
+    if(pages && !updated.total_pages)Object.assign(updated,window.MAKTABAH_VOLUMES.setDocumentPages(updated,pages));
     const next=prior.map(x=>x.id===book.id?updated:x);
     if(JSON.stringify(next).length>window.MAKTABAH_COVERS.MAX_BOOKS_JSON)throw new Error('Ukuran koleksi terlalu besar untuk cover tambahan. Hapus cover lain atau simpan cadangan.');
     state.books=next;
@@ -306,7 +344,7 @@
   }
   function readerMarkup() {
     const r=state.viewer;if(!r)return '';
-    return `<div class="reader-shade" role="dialog" aria-label="Baca PDF" aria-modal="true"><div class="reader-top"><button class="icon-btn" type="button" data-action="close-reader" aria-label="Kembali">${ico('chevron-left')}</button><div class="reader-title"><h2>${escape(r.book.title)}</h2><p>PEMBACA PDF · halaman tersimpan setelah berhasil ditampilkan</p></div><button class="icon-btn" type="button" data-action="close-reader" aria-label="Tutup pembaca">${ico('x')}</button></div><div class="reader-main" id="reader-main"><canvas class="reader-page" id="reader-canvas" role="img" aria-label="Halaman PDF ${r.page}"></canvas></div><div class="reader-bottom"><button type="button" class="btn btn-secondary" data-action="page-prev" ${r.page<=1?'disabled':''}>${ico('chevron-left')} Sebelumnya</button><div class="reader-page-num">${r.page} / ${r.total}</div><button type="button" class="btn btn-primary" data-action="page-next" ${r.page>=r.total?'disabled':''}>Berikutnya ${ico('chevron-right')}</button><span class="reader-tip">Gunakan tombol panah pada keyboard</span></div></div>`;
+    return `<div class="reader-shade" role="dialog" aria-label="Baca PDF" aria-modal="true"><div class="reader-top"><button class="icon-btn" type="button" data-action="close-reader" aria-label="Kembali">${ico('chevron-left')}</button><div class="reader-title"><h2>${escape(r.book.title)}</h2><p>PEMBACA PDF ${r.book.total_volumes>1?'· JUZ/JILID '+r.book.current_volume+'/'+r.book.total_volumes+' ':''}· halaman tersimpan setelah berhasil ditampilkan</p></div><button class="icon-btn" type="button" data-action="close-reader" aria-label="Tutup pembaca">${ico('x')}</button></div><div class="reader-main" id="reader-main"><canvas class="reader-page" id="reader-canvas" role="img" aria-label="Halaman PDF ${r.page}"></canvas></div><div class="reader-bottom"><button type="button" class="btn btn-secondary" data-action="page-prev" ${r.page<=1?'disabled':''}>${ico('chevron-left')} Sebelumnya</button><div class="reader-page-num">${r.page} / ${r.total}</div><button type="button" class="btn btn-primary" data-action="page-next" ${r.page>=r.total?'disabled':''}>Berikutnya ${ico('chevron-right')}</button><span class="reader-tip">Gunakan tombol panah pada keyboard</span></div></div>`;
   }
   async function openReader(book, file=null) {
     if (!window.pdfjsLib) {toast('Pustaka pembaca PDF belum termuat. Periksa internet atau gunakan penanda halaman manual.');return;}
@@ -325,7 +363,7 @@
           book=saveChosenCover(book,cover,doc.numPages);
         } catch(error) { console.warn('Cover otomatis dilewati:',error); }
       }
-      book.total_pages=doc.numPages;
+      Object.assign(book,window.MAKTABAH_VOLUMES.setDocumentPages(book,doc.numPages));
       mockSave();
       const r={book,pdf:doc,total:doc.numPages,page:Math.min(doc.numPages,Math.max(1,book.current_page||1)),renderEpoch:0,renderTask:null};
       state.viewer=r;
@@ -367,7 +405,7 @@
   }
   async function saveViewedPage(book,page) {
     try {
-      const response=await api(`/api/books/${encodeURIComponent(book.id)}/progress`,'POST',{page,source:'auto'});
+      const response=await api(`/api/books/${encodeURIComponent(book.id)}/progress`,'POST',{page,volume:book.current_volume,source:'auto'});
       const i=state.books.findIndex(b=>b.id===book.id);
       if(i!==-1)state.books[i]=response.book;
       if(state.viewer?.book.id===book.id)state.viewer.book=response.book;
@@ -398,16 +436,17 @@
     const title=String(b.title||'').slice(0,260).trim();if(!title)throw new Error('Judul kosong dalam cadangan.');
     const total=Math.max(0,Math.min(100000,Math.floor(Number(b.total_pages)||0)));
     const page=Math.max(0,Math.min(total||100000,Math.floor(Number(b.current_page)||0)));
-    return {
+    return window.MAKTABAH_VOLUMES.normalize({
       id:typeof b.id==='string' && /^[A-Za-z0-9_-]{3,120}$/.test(b.id) ? b.id : 'impor-'+index+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now()),
       title,author:String(b.author||'').slice(0,200),kind:b.kind==='buku'?'buku':'kitab',
       fann:String(b.fann||'Belum Diklasifikasikan').slice(0,100),
       pdf_url:url(b.pdf_url)||'',cover_url:window.MAKTABAH_COVERS?.safeCover(b.cover_url)||url(b.cover_url)||'',notes:String(b.notes||'').slice(0,4000),
-      total_pages:total,current_page:page,status:['belum','sedang','selesai'].includes(b.status)?b.status:(page?'sedang':'belum'),
+      total_pages:total,current_page:page,total_volumes:b.total_volumes,current_volume:b.current_volume,volume_progress:b.volume_progress,
+      status:['belum','sedang','selesai'].includes(b.status)?b.status:(page?'sedang':'belum'),
       last_read_at:typeof b.last_read_at==='string'?b.last_read_at:null,
       created_at:typeof b.created_at==='string'?b.created_at:new Date().toISOString(),
       updated_at:new Date().toISOString(),drive_file_id:null
-    };
+    });
   }
   async function importBackup(file){
     if(!file)return;
@@ -525,10 +564,15 @@
       try {await api(`/api/books/${encodeURIComponent(b.id)}`,'DELETE');clearDialog();await reloadBooks();toast('Catatan dihapus dari katalog. PDF asli tetap aman.');}catch(e){toast(e.message);}return;
     }
     if(a==='save-progress'&&b){
+      const volume=Number($('#manual-volume')?.value);
       const page=Number($('#manual-page')?.value);
-      if(!Number.isInteger(page)||page<0||(b.total_pages>0&&page>b.total_pages)){toast('Nomor halaman tidak valid.');return;}
-      try {const r=await api(`/api/books/${encodeURIComponent(b.id)}/progress`,'POST',{page,source:'manual'});
-        state.books=state.books.map(x=>x.id===b.id?r.book:x);detail(r.book);renderBody();toast('Progres bacaan tersimpan.');}
+      const volumeCount=window.MAKTABAH_VOLUMES.countOf(b);
+      const progress=window.MAKTABAH_VOLUMES.entriesOf(b)[String(volume)];
+      const volumeTotal=Number(progress?.total_pages)||0;
+      if(!Number.isInteger(volume)||volume<1||volume>volumeCount){toast('Nomor juz/jilid tidak valid.');return;}
+      if(!Number.isInteger(page)||page<0||page>100000||(volumeTotal>0&&page>volumeTotal)){toast('Nomor halaman tidak valid untuk juz/jilid ini.');return;}
+      try {const r=await api(`/api/books/${encodeURIComponent(b.id)}/progress`,'POST',{page,volume,source:'manual'});
+        state.books=state.books.map(x=>x.id===b.id?r.book:x);detail(r.book);renderBody();toast('Progres Juz/Jilid '+volume+' tersimpan.');}
       catch(e){toast(e.message);}return;
     }
   });
@@ -560,6 +604,31 @@
     try{const result=await window.MAKTABAH_COVERS.fromPdfFile(file);saveChosenCover(book,result.cover,result.pages);toast('Cover PDF halaman pertama berhasil disimpan.');}
     catch(error){toast(error.message||'PDF tidak dapat dijadikan cover.');}
   });
+  document.addEventListener('change',event=>{
+    if(event.target.id==='book-volume-total'||event.target.id==='book-volume-active'){
+      if(!state.volumeFormDraft||!stashFormVolume()){
+        if(event.target.id==='book-volume-active')event.target.value=String(state.volumeFormSelected||1);
+        return;
+      }
+      selectFormVolume($('#book-volume-active').value,$('#book-volume-total').value);
+    }
+    if(event.target.id==='book-total'){
+      const page=$('#book-page');
+      if(page)page.max=String(Number(event.target.value)||100000);
+    }
+    if(event.target.id==='manual-volume'){
+      const id=state.dialog?.id;
+      const book=state.books.find(b=>b.id===id);
+      if(!book)return;
+      const n=window.MAKTABAH_VOLUMES.normalize(book);
+      const volume=Number(event.target.value);
+      if(!Number.isInteger(volume)||volume<1||volume>n.total_volumes){event.target.value=String(n.current_volume);return;}
+      const current=n.volume_progress[volume]||{page:0,total_pages:0};
+      $('#manual-page').value=String(current.page||0);
+      $('#manual-page').max=String(current.total_pages||100000);
+      $('#manual-page-hint').textContent=current.total_pages?'dari '+current.total_pages+' halaman':'belum ada total halaman';
+    }
+  });
   document.addEventListener('input',event=>{
     if(event.target.id==='search-input'){
       const cursor=event.target.selectionStart;
@@ -572,6 +641,22 @@
     event.preventDefault();
     const form=event.target;const fd=new FormData(form);
     const data={title:String(fd.get('title')||'').trim(),author:String(fd.get('author')||'').trim(),kind:fd.get('kind'),fann:String(fd.get('fann')||''),pdf_url:String(fd.get('pdf_url')||''),cover_url:String(fd.get('cover_url')||''),total_pages:Number(fd.get('total_pages')||0),notes:String(fd.get('notes')||'')};
+    const count=Number(fd.get('total_volumes')),active=Number(fd.get('current_volume'));
+    if(!Number.isInteger(count)||count<1||count>999||!Number.isInteger(active)||active<1||active>count){toast('Jumlah atau nomor juz/jilid tidak valid.');return;}
+    if(active!==state.volumeFormSelected) {
+      if(!stashFormVolume())return;
+      selectFormVolume(active,count);
+    }
+    if(!stashFormVolume())return;
+    state.volumeFormDraft=window.MAKTABAH_VOLUMES.setActive(state.volumeFormDraft,{total_volumes:count,current_volume:active});
+    const volumeData=state.volumeFormDraft;
+    Object.assign(data,{
+      total_volumes:volumeData.total_volumes,
+      current_volume:volumeData.current_volume,
+      volume_progress:volumeData.volume_progress,
+      total_pages:volumeData.total_pages,
+      current_page:volumeData.current_page
+    });
     if(!data.title){toast('Judul bacaan wajib diisi.');return;}
     if((data.pdf_url&&!url(data.pdf_url))||(data.cover_url&&!url(data.cover_url))){toast('Tautan harus dimulai dengan https:// atau http://');return;}
     const editing=state.dialog?.id;

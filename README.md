@@ -1,4 +1,4 @@
-# Maktabahrizqy - GitHub Pages v0.6
+# Maktabahrizqy - GitHub Pages v0.7
 
 Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi Bacaan**, dan **Koleksi Ku**. Berjalan sebagai situs statis di GitHub Pages tanpa Railway. **Login Google bersifat opsional, khusus untuk menyinkronkan koleksi dan progres antarperangkat.**
 
@@ -17,6 +17,19 @@ Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi
 - Rilis v0.4 menambahkan katalog awal sekali ke data lokal yang sudah ada, tanpa menghapus bacaan/progres yang telah tersimpan.
 - Jika suatu judul bawaan dihapus, judul tersebut tidak muncul kembali sesudah refresh pada browser yang sama.
 - Ekspor cadangan pribadi dalam JSON tersedia di sidebar dan Jelajahi Bacaan. File cadangan sebaiknya disimpan secara aman.
+
+## Juz/Jilid dan progres per-volume (v0.7)
+
+- Form **Tambah Bacaan / Ubah Data** kini memuat **Jumlah Juz/Jilid**, **Juz/Jilid yang dibaca**, **Jumlah halaman** dan **Halaman terakhir** untuk jilid terpilih. Default kitab lama adalah **1 jilid** tanpa menghapus data bacaan.
+- Bagian **Simpan Progres** pada detail kitab memiliki input **Juz/Jilid** dan **Halaman**. Perpindahan jilid mengembalikan halaman terakhir setiap jilid yang sudah dicatat.
+- Indikator progres katalog menggunakan persentase gabungan semua jilid; bila jumlah halaman suatu jilid belum diisi, jilid itu belum masuk hitungan bagian terbaca.
+- Backup JSON dan sinkronisasi Google Drive appDataFolder membawa metadata juz/jilid. Konflik HP/laptop ditangani dengan waktu pembaruan per jilid (tetap disarankan menyinkronkan tiap selesai sesi).
+- Tautan PDF saat ini satu untuk satu entri judul. File PDF per jilid dapat dipilih dari perangkat saat membaca, tanpa mengunggah file tersebut ke situs.
+
+## Cover ukuran kitab penuh (v0.7)
+
+- Tampilan cover berbentuk buku tegak 2:3. Gambar memakai `object-fit: contain`: seluruh gambar terlihat tanpa *zoom/crop*, ruang kosong pada sisi gambar diperbolehkan.
+- Pengaturan ini berlaku pada rak katalog, bagian lanjutkan membaca, dan detail bacaan. Cover tipografi bawaan tetap muncul saat foto/thumbnail tidak tersedia.
 
 ## Cover otomatis + cover lokal (v0.6)
 
