@@ -605,7 +605,10 @@
     }
     if(a==='khatam-add'&&b){
       const current=window.MAKTABAH_KHATAM.normalize(b);
-      if(!window.confirm(`Catat satu kali khatam untuk "${current.title}"? Saat ini ${current.khatam_count} kali.`))return;
+      // One-tap khatam: native window.confirm is suppressed in some mobile/in-app browsers.
+      // Mistakes are corrected with "Sudah khatam (kali)" in Edit Bacaan.
+      if(state.lastKhatamAt && Date.now()-state.lastKhatamAt<650)return;
+      state.lastKhatamAt=Date.now();
       const before=state.books;
       try{
         const updated=window.MAKTABAH_KHATAM.add(current);
