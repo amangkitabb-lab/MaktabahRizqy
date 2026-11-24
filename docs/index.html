@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="./google-sync.css">
   <link rel="stylesheet" href="./cover-tools.css">
   <link rel="stylesheet" href="./reading-style.css">
+  <link rel="stylesheet" href="./library-layout.css">
 </head>
 <body data-theme="light">
   <div id="app" class="app-shell">
@@ -28,6 +29,10 @@
         <button class="nav-link" data-nav="explore" type="button"><span class="nav-symbol" data-icon="compass"></span><span>Jelajahi Bacaan</span></button>
         <button class="nav-link" data-nav="collection" type="button"><span class="nav-symbol" data-icon="library"></span><span>Koleksi Ku</span></button>
       </nav>
+      <section class="sidebar-categories-wrap" aria-label="Kategori bacaan">
+        <div class="sidebar-categories-header"><span>KOLEKSI</span><span id="sidebar-category-count"></span></div>
+        <div id="sidebar-category-list" class="sidebar-category-list" role="navigation" aria-label="Kumpulan fann dan jenis bacaan"></div>
+      </section>
       <section class="cloud-panel" aria-label="Sinkronisasi Google">
         <div class="cloud-panel-heading"><span data-icon="refresh"></span><span>Sinkronisasi antarperangkat</span></div>
         <small class="cloud-panel-status" id="cloud-status" aria-live="polite">Mempersiapkan sinkronisasi Google...</small>
@@ -46,9 +51,10 @@
       <div class="sidebar-account">
         <div class="avatar">R</div>
         <div class="sidebar-account-text"><strong id="cloud-account-title">Rak Bacaan Lokal</strong><small id="sidebar-user">Tersimpan di browser ini</small></div>
+        <button type="button" class="icon-btn tiny" id="settings-btn" aria-label="Pengaturan tampilan" title="Pengaturan"><span data-icon="settings"></span></button>
         <button type="button" class="icon-btn tiny" id="backup-btn" aria-label="Ekspor cadangan koleksi" title="Ekspor cadangan koleksi"><span data-icon="download"></span></button><button type="button" class="icon-btn tiny" id="restore-btn" aria-label="Impor cadangan koleksi" title="Impor cadangan koleksi"><span data-icon="upload"></span></button>
       </div>
-      <div class="sidebar-version">MAKTABAHRIZQY v0.8 <span>© 2026</span></div>
+      <div class="sidebar-version">MAKTABAHRIZQY v0.9 <span>© 2026</span></div>
     </aside>
     <div class="workspace">
       <header class="topbar">
@@ -57,8 +63,10 @@
           <div class="breadcrumb"><span>PERPUSTAKAAN DIGITAL</span><span class="slash">/</span><b id="crumb-current">Web Utama</b></div>
         </div>
         <div class="topbar-actions">
+          <button type="button" id="quick-search-btn" class="icon-btn quick-search" aria-label="Cari kitab atau buku" title="Cari kitab atau buku"><span data-icon="search"></span></button>
           <span class="demo-pill" id="demo-pill" hidden>PRATINJAU DEMO</span>
           <span class="privacy-label"><span class="privacy-dot"></span>DATA DI BROWSER</span>
+          <button type="button" id="settings-top-btn" class="icon-btn settings-top-btn" aria-label="Buka pengaturan tampilan" title="Pengaturan tampilan"><span data-icon="settings"></span></button>
           <button type="button" id="theme-btn" class="icon-btn theme-btn" aria-label="Aktifkan mode gelap" title="Aktifkan mode gelap"><span data-icon="moon"></span><span class="theme-label">Mode gelap</span></button>
           <button type="button" id="add-btn" class="btn btn-primary"><span data-icon="plus"></span><span>Tambah Bacaan</span></button>
         </div>
@@ -75,6 +83,7 @@
     </nav>
   </div>
   <input id="private-link-file" type="file" accept="application/json,.json" hidden aria-label="Impor tautan PDF Drive pribadi"><input id="local-pdf-input" type="file" accept="application/pdf,.pdf" hidden aria-label="Pilih PDF dari perangkat"><input id="restore-file" type="file" accept="application/json,.json" hidden aria-label="Pilih cadangan koleksi"><input id="cover-image-input" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden aria-label="Upload cover dari perangkat"><input id="cover-pdf-input" type="file" accept="application/pdf,.pdf" hidden aria-label="Pilih PDF lokal untuk cover halaman pertama"><div id="dialog-root"></div>
+  <div id="settings-root"></div>
   <div id="toast-root" role="status" aria-live="polite"></div>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer"></script>
   <script src="./catalogue.js" defer></script>

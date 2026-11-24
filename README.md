@@ -1,4 +1,4 @@
-# Maktabahrizqy - GitHub Pages v0.8
+# Maktabahrizqy - GitHub Pages v0.9
 
 Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi Bacaan**, dan **Koleksi Ku**. Berjalan sebagai situs statis di GitHub Pages tanpa Railway. **Login Google bersifat opsional, khusus untuk menyinkronkan koleksi dan progres antarperangkat.**
 
@@ -17,6 +17,16 @@ Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi
 - Rilis v0.4 menambahkan katalog awal sekali ke data lokal yang sudah ada, tanpa menghapus bacaan/progres yang telah tersimpan.
 - Jika suatu judul bawaan dihapus, judul tersebut tidak muncul kembali sesudah refresh pada browser yang sama.
 - Ekspor cadangan pribadi dalam JSON tersedia di sidebar dan Jelajahi Bacaan. File cadangan sebaiknya disimpan secara aman.
+
+## Tata letak & Pengaturan (v0.9)
+
+- Tata letak editorial yang terinspirasi dari referensi F15 Library: **sidebar navigasi tetap Web Utama / Jelajahi Bacaan / Koleksi Ku**, kategori kitab/fann dengan daftar gulir, kontrol pencarian, pengaturan akun di area bawah, dan rak-rak **horizontal** dengan tombol geser.
+- Halaman Web Utama kini mengutamakan rak **Baru ditambahkan**, **Maraji' Fiqh Travelling**, dan **Buku yang mungkin terlewat**; statistik termasuk khatam muncul sebagai bagian **Jejak bacamu**.
+- Klik roda gigi **Pengaturan** di sidebar atau bagian atas untuk memilih **Ukuran teks: Kecil / Standar / Besar**, serta **Tema: Terang / Krem / Gelap**. Pilihan disimpan secara lokal (`maktabah_theme` dan `maktabah_text_size`) tanpa mengubah katalog, kemajuan baca, atau data Google.
+- **Krem bukan sepia:** palet netral krem terang (#f7f5ee), latar kartu putih gading, teks abu-abu arang. **Gelap yang terbaca:** latar charcoal (#121416), teks utama mendekati putih, teks sekunder abu terang, border lebih jelas dan fokus keyboard kontras.
+- Cover tetap portrait 2:3 dengan `object-fit: contain`; gambar utuh, tidak diperbesar/crop. UI menggunakan Inter, judul Fraunces, teks baca Gelasio, dan tulisan Arab Tajawal.
+- Modal pengaturan mengandung pintasan **Kelola sinkronisasi**, **Ekspor JSON**, **Impor JSON**. Fitur pemasangan di perangkat bergantung browser (bukan tombol instalasi palsu).
+- Perubahan UI tidak memodifikasi isi/izin/tautan PDF sumber pada Google Drive dan tidak menaruh data pribadi di GitHub.
 
 ## Maraji' Fiqh Travelling (v0.8)
 

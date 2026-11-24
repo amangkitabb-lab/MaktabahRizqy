@@ -1,4 +1,4 @@
-/* Maktabahrizqy GitHub Pages v0.8 — Maraji' Fiqh Travelling, khatam count, F15-inspired typography. */
+/* Maktabahrizqy GitHub Pages v0.9 — F15-inspired editorial shelves, settings and accessible themes. */
 (() => {
   'use strict';
   const PREVIEW = true; // Reuse local-data operations; there is no backend in Pages edition.
@@ -34,6 +34,7 @@
     'book-open': '<path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v14c-3-1-6-1-9 1-3-2-6-2-9-1zM12 6v14"/>',
     upload: '<path d="M12 16V3m-5 5 5-5 5 5M4 17v4h16v-4"/>',
     download: '<path d="M12 3v13m-5-5 5 5 5-5M4 18v3h16v-3"/>',
+    settings: '<path d="M12 15.3a3.3 3.3 0 1 0 0-6.6 3.3 3.3 0 0 0 0 6.6z"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 2l-2.1 2.1a1.8 1.8 0 0 0-2-.36 1.8 1.8 0 0 0-1.1 1.66v.6h-3v-.6a1.8 1.8 0 0 0-1.1-1.66 1.8 1.8 0 0 0-2 .36l-2.1-2.1a1.8 1.8 0 0 0 .36-2 1.8 1.8 0 0 0-1.66-1.1H4v-3h.6a1.8 1.8 0 0 0 1.66-1.1 1.8 1.8 0 0 0-.36-2l2.1-2.1a1.8 1.8 0 0 0 2 .36A1.8 1.8 0 0 0 11.1 4.4V4h3v.4A1.8 1.8 0 0 0 15.2 6a1.8 1.8 0 0 0 2-.36l2.1 2.1a1.8 1.8 0 0 0-.36 2 1.8 1.8 0 0 0 1.66 1.1h.4v3h-.4a1.8 1.8 0 0 0-1.2 1.16z"/>',
   };
   const ico = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.book}</svg>`;
   const escape = (text) => String(text == null ? '' : text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -65,7 +66,8 @@
   };
   const state = {
     preview: false,
-    theme: storage.get('maktabah_theme') === 'dark' ? 'dark' : 'light',
+    theme: ['light','cream','dark'].includes(storage.get('maktabah_theme')) ? storage.get('maktabah_theme') : 'cream',
+    textSize: ['small','standard','large'].includes(storage.get('maktabah_text_size')) ? storage.get('maktabah_text_size') : 'standard',
     view:'home', books:[], query:'', category:'Semua', kind:'Semua',
     me:null, dialog:null, viewer:null, busy:false
   };
@@ -182,6 +184,21 @@
   }
   function pageHeader(title, subtitle, eyebrow='RUANG BACA') {return `<div class="page-heading"><div><div class="eyebrow">${escape(eyebrow)}</div><h1 class="page-title">${title}</h1><p class="page-subtitle">${escape(subtitle)}</p></div></div>`;}
   function stat(label,number,subtitle,icon) {return `<div class="stat"><div class="stat-head"><span>${label}</span>${ico(icon)}</div><div class="stat-num">${number}</div><div class="stat-bottom">${subtitle}</div></div>`;}
+
+  function shelfMarkup(id,books,title,description,options={}) {
+    if(!books.length)return '';
+    const action=options.category
+      ? `<button class="plain-link" type="button" data-side-category="${escape(options.category)}">Lihat semua ${ico('arrow-right')}</button>`
+      : options.view
+      ? `<button class="plain-link" type="button" data-nav="${escape(options.view)}">Lihat semua ${ico('arrow-right')}</button>` : '';
+    return `<section class="section library-shelf">
+      <div class="section-head"><div><h2>${escape(title)}</h2><p>${escape(description)}</p></div>
+      <div class="shelf-controls">${action}
+        <button type="button" class="shelf-arrow" data-scroll-target="${escape(id)}" data-scroll-dir="-1" aria-label="Geser ${escape(title)} ke kiri">${ico('chevron-left')}</button>
+        <button type="button" class="shelf-arrow" data-scroll-target="${escape(id)}" data-scroll-dir="1" aria-label="Geser ${escape(title)} ke kanan">${ico('chevron-right')}</button>
+      </div></div><div class="editorial-shelf" id="${escape(id)}">${books.map(bookCard).join('')}</div>
+    </section>`;
+  }
   function homeMarkup() {
     const list=state.books;
     const underway=list.filter(x=>x.status==='sedang');
@@ -189,17 +206,21 @@
     const pages=list.reduce((sum,b)=>sum+Object.values(window.MAKTABAH_VOLUMES.entriesOf(b)).reduce((v,p)=>v+(Number(p.page)||0),0),0);
     const khatamTotal=list.reduce((sum,b)=>sum+window.MAKTABAH_KHATAM.normalize(b).khatam_count,0);
     const maraji=list.filter(b=>b.fann===MARAJI);
-    const recent=[...underway].sort((a,b)=>(b.last_read_at||'').localeCompare(a.last_read_at||''));
-    const current=recent[0];
-    const latest=[...list].sort((a,b)=>(b.updated_at||'').localeCompare(a.updated_at||'')).slice(0,4);
-    return `
-      ${pageHeader('Selamat datang di <em>rak bacamu.</em>','Ruang tenang untuk menyimpan, menemukan, dan melanjutkan setiap bacaan.','RAK DIGITALMU')}
-      <section class="hero"><div class="hero-content"><div class="eyebrow">مكتبة رزقي • MAKTABAHRIZQY</div><h2 class="hero-title">Satu rak. <em>Seribu</em> pengetahuan.</h2><p class="hero-description">Simpan kitab dan buku pilihanmu. Kembali ke halaman terakhir, kapan pun kamu ingin melanjutkan.</p><button class="btn hero-action" type="button" data-nav="explore">Jelajahi Bacaan ${ico('arrow-right')}</button></div><div class="hero-art" aria-hidden="true"><div class="hero-card"><span class="arabic">اقرأ</span></div><span class="hero-vertical">READ · REFLECT · REMEMBER</span></div></section>
+    const recent=[...list].sort((a,b)=>(b.updated_at||'').localeCompare(a.updated_at||'')).slice(0,10);
+    const readRecently=[...underway].sort((a,b)=>(b.last_read_at||'').localeCompare(a.last_read_at||''));
+    const current=readRecently[0];
+    const recentIds=new Set(recent.map(b=>b.id));
+    const overlooked=list.filter(b=>b.status==='belum'&&!recentIds.has(b.id)&&b.fann!==MARAJI).slice(0,10);
+    let html=pageHeader('Karena bacaan kamu belakangan ini','Koleksi dan rujukan yang dekat dengan perjalanan bacamu.','PERPUSTAKAAN PRIBADI');
+    html+=shelfMarkup('shelf-recent',recent,'Baru ditambahkan','Judul yang terakhir kamu masukkan atau perbarui.',{view:'collection'});
+    if(current)html+=`<section class="section"><div class="section-head"><div><h2>Lanjutkan membaca</h2><p>Sambung dari halaman dan jilid terakhir yang tersimpan.</p></div></div><div class="continue-panel">${coverMarkup(current)}<div class="continue-copy"><div class="eyebrow">BACAAN TERAKHIR</div><h3>${escape(current.title)}</h3><p>${escape(current.author||current.fann)}</p>${progressMarkup(current)}</div><button type="button" class="btn btn-primary" data-open="${escape(current.id)}">Lanjutkan ${ico('arrow-right')}</button></div></section>`;
+    html+=shelfMarkup('shelf-maraji',maraji,"Maraji' Fiqh Travelling",`${maraji.length} rujukan fiqh safar dalam rak khusus.`,{category:MARAJI});
+    html+=shelfMarkup('shelf-missed',overlooked.length?overlooked:list.filter(b=>!recentIds.has(b.id)).slice(0,10),'Buku yang mungkin terlewat','Temukan bacaan lama yang bisa kamu mulai lagi.',{view:'explore'});
+    html+=`<section class="section library-summary"><div class="section-head"><div><h2>Jejak bacamu</h2><p>Progres dan khatam yang kamu catat sendiri.</p></div></div>
       <div class="stats">${stat('Total Koleksi',list.length,'Kitab & buku tercatat','layers')}${stat('Sedang Dibaca',underway.length,'Bacaan yang berjalan','book')}${stat('Selesai Dibaca',finished.length,'Bacaan tuntas','check')}${stat('Halaman Terbaca',pages.toLocaleString('id-ID'),'Terakumulasi di koleksi','clock')}${stat('Total Khatam',khatamTotal.toLocaleString('id-ID'),'Khatam seluruh kitab','check')}</div>
-      ${current?`<section class="section"><div class="section-head"><div><h2>Lanjutkan membaca</h2><p>Lanjut tepat dari tempat kamu berhenti.</p></div></div><div class="continue-panel">${coverMarkup(current)}<div class="continue-copy"><div class="eyebrow">BACAAN TERAKHIR</div><h3>${escape(current.title)}</h3><p>${escape(current.author||current.fann)}</p>${progressMarkup(current)}</div><button type="button" class="btn btn-primary" data-open="${escape(current.id)}">Lanjutkan ${ico('arrow-right')}</button></div></section>`:''}
-      <div class="catalogue-hint">Katalog awal diisi dari judul kitab dan buku yang teridentifikasi di arsip Drive. Tautan PDF tidak dipublikasikan. Untuk menautkan PDF secara pribadi, buka Jelajahi Bacaan lalu pilih Impor Tautan PDF.</div>
-      ${maraji.length?`<section class="section maraji-section"><div class="section-head"><div><span class="section-kicker">RAK KHUSUS</span><h2>Maraji' Fiqh Travelling</h2><p>${maraji.length} rujukan fiqh safar · cover ditentukan sendiri</p></div><button type="button" class="plain-link" data-action="open-maraji">Lihat semua ${ico('arrow-right')}</button></div><div class="maraji-scroll">${maraji.map(bookCard).join('')}</div></section>`:''}
-      <section class="section"><div class="section-head"><div><h2>${list.length?'Baru di rakmu':'Mulai membangun rakmu'}</h2><p>${list.length?'Bacaan yang terakhir kamu simpan atau perbarui.':'Semua kitab dan buku nantinya tersusun rapi di sini.'}</p></div>${list.length?`<button class="plain-link" data-nav="collection" type="button">Lihat Koleksi Ku ${ico('arrow-up-right')}</button>`:''}</div>${grid(latest)}</section>`;
+    </section>`;
+    html+='<p class="catalogue-hint">Tautan PDF pribadi dan progres hanya disimpan di browser atau akun Google yang kamu sambungkan. Katalog publik tidak membuka akses ke file Drive pribadimu.</p>';
+    return html;
   }
   function exploreMarkup() {
     const fannValues=['Semua',...new Set(state.books.map(b=>b.kind==='buku'?'Buku Bacaan':b.fann))];
@@ -230,24 +251,96 @@
     $('#crumb-current').textContent=displayTitle[state.view];
     document.title=`${displayTitle[state.view]} — Maktabahrizqy`;
   }
+  function renderSidebarCategories() {
+    const root=$('#sidebar-category-list');if(!root)return;
+    const totals=new Map();
+    state.books.forEach(book=>{
+      const category=book.kind==='buku'?'Buku Bacaan':String(book.fann||'Belum Diklasifikasikan');
+      totals.set(category,(totals.get(category)||0)+1);
+    });
+    const names=[...totals.keys()].sort((a,b)=>a===MARAJI?-1:b===MARAJI?1:a.localeCompare(b,'id'));
+    const count=$('#sidebar-category-count');if(count)count.textContent=String(names.length);
+    const active=(key)=>state.view==='explore'&&state.category===key;
+    root.innerHTML=`<button type="button" class="sidebar-category ${active('Semua')?'active':''}" data-side-category="Semua" ${active('Semua')?'aria-current="page"':''}><span>Semua koleksi</span><span class="genre-count">${state.books.length}</span></button>`
+      +names.map(name=>`<button type="button" class="sidebar-category ${active(name)?'active':''}" data-side-category="${escape(name)}" ${active(name)?'aria-current="page"':''}><span title="${escape(name)}">${escape(name)}</span><span class="genre-count">${totals.get(name)}</span></button>`).join('');
+  }
   function renderBody() {
     if (!state.me?.authenticated) return;
     $('#content').innerHTML=state.view==='home'?homeMarkup():state.view==='explore'?exploreMarkup():collectionMarkup();
     activateNav();
+    renderSidebarCategories();
   }
   function go(view) {
     if (!(view in displayTitle) || !state.me?.authenticated) return;
     state.view=view;state.query='';state.category='Semua';state.kind='Semua';
     document.body.classList.remove('sidebar-open');renderBody();window.scrollTo({top:0,behavior:'instant'});
   }
+
   function setTheme(value) {
-    state.theme=value; document.body.dataset.theme=value;
+    if(!['light','cream','dark'].includes(value))value='cream';
+    state.theme=value;
+    document.body.dataset.theme=value;
     storage.set('maktabah_theme',value);
+    const meta=$('meta[name="theme-color"]');
+    if(meta)meta.content=value==='dark'?'#121416':value==='cream'?'#f7f5ee':'#f9f9f8';
     const btn=$('#theme-btn');
-    const label=value==='dark'?'Mode terang':'Mode gelap';
-    btn.innerHTML=ico(value==='dark'?'sun':'moon')+`<span class="theme-label">${label}</span>`;
-    btn.setAttribute('aria-label','Aktifkan '+label.toLowerCase());
-    btn.title='Aktifkan '+label.toLowerCase();
+    if(btn){
+      const next=value==='dark'?'Krem':'Gelap';
+      btn.innerHTML=ico(value==='dark'?'sun':'moon')+`<span class="theme-label">Mode ${next.toLowerCase()}</span>`;
+      btn.setAttribute('aria-label','Aktifkan mode '+next.toLowerCase());
+      btn.title='Aktifkan mode '+next.toLowerCase();
+    }
+    refreshSettingsControls();
+  }
+  function setTextSize(value) {
+    if(!['small','standard','large'].includes(value))value='standard';
+    state.textSize=value;
+    document.body.dataset.textSize=value;
+    storage.set('maktabah_text_size',value);
+    refreshSettingsControls();
+  }
+  function refreshSettingsControls() {
+    $$('.settings-segmented [data-setting-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.settingTheme===state.theme)));
+    $$('.settings-segmented [data-setting-size]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.settingSize===state.textSize)));
+  }
+  function openSettings() {
+    const themeOptions=[['light','Terang'],['cream','Krem'],['dark','Gelap']];
+    const sizeOptions=[['small','Kecil'],['standard','Standar'],['large','Besar']];
+    const segment=(items,attribute,current)=>items.map(([value,label])=>`<button type="button" ${attribute}="${value}" aria-pressed="${String(value===current)}">${label}</button>`).join('');
+    const cloudMessage=$('#cloud-status')?.textContent||'Koleksi disimpan di browser ini.';
+    const cloudAccount=$('#sidebar-user')?.textContent||'Rak Bacaan Lokal';
+    const el=$('#settings-root');
+    if(!el)return;
+    el.innerHTML=`<div class="settings-overlay" data-settings-dismiss="true">
+      <section class="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1">
+        <div class="settings-heading"><h2 id="settings-title">Pengaturan</h2>
+          <button type="button" class="settings-close" data-settings-close="true" aria-label="Tutup pengaturan">${ico('x')}</button></div>
+        <div class="settings-group"><label id="settings-font-label">Ukuran teks</label>
+          <div class="settings-segmented" role="group" aria-labelledby="settings-font-label">${segment(sizeOptions,'data-setting-size',state.textSize)}</div>
+        </div>
+        <div class="settings-group"><label id="settings-theme-label">Tema</label>
+          <div class="settings-segmented" role="group" aria-labelledby="settings-theme-label">${segment(themeOptions,'data-setting-theme',state.theme)}</div>
+          <p class="settings-description">Krem adalah warna kertas netral, bukan filter sepia. Tema gelap memakai teks terang dengan kontras tinggi.</p>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-group"><label>Akun & sinkronisasi</label>
+          <div class="settings-account"><div><strong>${escape(cloudAccount)}</strong><br><small>Data pribadi di perangkat dan Google jika terhubung</small></div>
+            <button type="button" class="btn btn-secondary" data-settings-action="sync">Kelola</button></div>
+          <p class="settings-status">${escape(cloudMessage)}</p>
+        </div>
+        <div class="settings-group"><label>Cadangan koleksi</label>
+          <div class="settings-actions"><button type="button" data-settings-action="backup">${ico('download')} Ekspor JSON</button>
+            <button type="button" data-settings-action="restore">${ico('upload')} Impor JSON</button></div>
+        </div>
+        <div class="settings-divider"></div>
+        <p class="settings-description">Maktabahrizqy bisa dipasang melalui menu browser <strong>Tambahkan ke layar utama</strong> jika tersedia. Progres, cover, dan penghitung khatam tidak diubah oleh pengaturan tampilan.</p>
+      </section></div>`;
+    document.body.classList.add('settings-open');
+    el.querySelector('.settings-close')?.focus();
+  }
+  function closeSettings() {
+    document.body.classList.remove('settings-open');
+    const el=$('#settings-root');if(el)el.innerHTML='';
   }
   function renderCloudStatus(info) {
     const message=$('#cloud-status');
@@ -525,7 +618,8 @@
 
   async function init() {
     setTheme(state.theme);
-    $$('[data-icon]').forEach(el=>{el.innerHTML=ico(el.dataset.icon)});
+    setTextSize(state.textSize);
+    $('[data-icon]').forEach(el=>{el.innerHTML=ico(el.dataset.icon)});
     $('#demo-pill').hidden=true;
     try {
       state.me=await api('/api/me');
@@ -553,8 +647,42 @@
     if(event.target.closest('#cloud-login-btn')){window.MAKTABAH_CLOUD?.connect();return;}
     if(event.target.closest('#cloud-sync-btn')){await window.MAKTABAH_CLOUD?.syncNow();return;}
     if(event.target.closest('#cloud-logout-btn')){window.MAKTABAH_CLOUD?.disconnect();return;}
+    if(event.target.closest('#settings-btn,#settings-top-btn')){openSettings();return;}
+    if(event.target.closest('[data-settings-close]') || event.target.matches('[data-settings-dismiss="true"]')){closeSettings();return;}
+    const themeOption=event.target.closest('[data-setting-theme]');
+    if(themeOption){setTheme(themeOption.dataset.settingTheme);return;}
+    const sizeOption=event.target.closest('[data-setting-size]');
+    if(sizeOption){setTextSize(sizeOption.dataset.settingSize);return;}
+    const settingsAction=event.target.closest('[data-settings-action]');
+    if(settingsAction){
+      const action=settingsAction.dataset.settingsAction;
+      closeSettings();
+      if(action==='backup')exportBackup();
+      else if(action==='restore')$('#restore-file')?.click();
+      else if(action==='sync'){
+        document.body.classList.add('sidebar-open');
+        const panel=$('.cloud-panel');panel?.scrollIntoView({behavior:'smooth',block:'nearest'});
+        const btn=$('#cloud-sync-btn')?.hidden?$('#cloud-login-btn'):$('#cloud-sync-btn');
+        btn?.focus();
+      }
+      return;
+    }
+    const sideGenre=event.target.closest('[data-side-category]');
+    if(sideGenre){
+      state.view='explore';state.query='';state.kind='Semua';state.category=sideGenre.dataset.sideCategory||'Semua';
+      document.body.classList.remove('sidebar-open');renderBody();
+      window.scrollTo({top:0,behavior:'instant'});
+      return;
+    }
+    const shelfArrow=event.target.closest('[data-scroll-target]');
+    if(shelfArrow){
+      const area=document.getElementById(shelfArrow.dataset.scrollTarget);
+      if(area)area.scrollBy({left:Number(shelfArrow.dataset.scrollDir||1)*Math.max(300,area.clientWidth*.8),behavior:'smooth'});
+      return;
+    }
     const nav=event.target.closest('[data-nav]');if(nav){go(nav.dataset.nav);return;}
-    if(event.target.closest('#theme-btn')){setTheme(state.theme==='dark'?'light':'dark');return;}
+    if(event.target.closest('#quick-search-btn')){go('explore');$('#search-input')?.focus();return;}
+    if(event.target.closest('#theme-btn')){setTheme(state.theme==='dark'?'cream':'dark');return;}
     if(event.target.closest('#menu-btn')){document.body.classList.toggle('sidebar-open');return;}
     if(event.target.id==='mobile-shade'){document.body.classList.remove('sidebar-open');return;}
     if(event.target.closest('#add-btn')){if(state.me?.authenticated)bookForm();return;}
@@ -741,7 +869,12 @@
     if (event.target?.matches?.('.book-cover img')) event.target.remove();
   }, true);
   document.addEventListener('keydown',event=>{
-    if(event.key==='Escape') {if(state.viewer)closeReader();else if(state.dialog)clearDialog();else document.body.classList.remove('sidebar-open');}
+    if(event.key==='Escape') {
+      if(document.body.classList.contains('settings-open'))closeSettings();
+      else if(state.viewer)closeReader();
+      else if(state.dialog)clearDialog();
+      else document.body.classList.remove('sidebar-open');
+    }
     if(state.viewer&&event.key==='ArrowRight'){event.preventDefault();moveReader(1);}
     if(state.viewer&&event.key==='ArrowLeft'){event.preventDefault();moveReader(-1);}
   });
