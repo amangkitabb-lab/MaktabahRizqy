@@ -1,4 +1,4 @@
-/* Maktabahrizqy GitHub Pages v0.5 — local-first collection with optional Google sync. */
+/* Maktabahrizqy GitHub Pages v0.6 — private PDF links and hybrid cover manager. */
 (() => {
   'use strict';
   const PREVIEW = true; // Reuse local-data operations; there is no backend in Pages edition.
@@ -42,7 +42,7 @@
   const memoryStore = {};
   const storage = {
     get: key => {try {return window.localStorage.getItem(key) ?? memoryStore[key] ?? null} catch (_) {return memoryStore[key] ?? null}},
-    set: (key,value) => {memoryStore[key] = value;try {window.localStorage.setItem(key,value)} catch (_) {}},
+    set: (key,value) => {memoryStore[key] = value;try {window.localStorage.setItem(key,value);return true} catch (_) {return false}},
   };
   const FANN = ['Belum Diklasifikasikan', 'Fiqh', 'Aqidah', 'Mantiq', 'Nahwu', 'Sharaf', 'Ushul Fiqh', 'Kaidah Fiqh', 'Tafsir', 'Hadis', 'Tasawuf', 'Akhlak', 'Doa & Wirid', 'Faraidh', 'Tajwid', 'Balaghah', 'Sejarah', 'Bahasa Arab', 'Lainnya'];
   const demoBooks = Array.isArray(window.MAKTABAH_SEED_BOOKS) ? window.MAKTABAH_SEED_BOOKS : [];
@@ -88,8 +88,9 @@
     return saved;
   };
   const mockSave = () => {
-    storage.set(BOOKS_KEY, JSON.stringify(state.books));
+    const stored=storage.set(BOOKS_KEY, JSON.stringify(state.books));
     window.MAKTABAH_CLOUD?.notifyLocalChange();
+    return stored;
   };
   async function api(path, method='GET', data) {
     if (PREVIEW) {
@@ -141,10 +142,10 @@
   function progressMarkup(book) {const pct=progressPct(book);return `<div class="progress-rail"><progress value="${pct}" max="100" aria-label="Progres ${pct} persen"></progress></div><div class="progress-row"><span>${book.current_page?`Hal. ${book.current_page} ${book.total_pages?'/ '+book.total_pages:''}`:'Belum dimulai'}</span><span>${pct}%</span></div>`;}
   function coverMarkup(book, extra='') {
     const tone=[...book.title].reduce((a,c)=>a+c.charCodeAt(0),0)%6;
-    const image = url(book.cover_url)||(book.drive_file_id&&!PREVIEW?`/api/books/${encodeURIComponent(book.id)}/cover`:'');
+    const image = window.MAKTABAH_COVERS?.coverSrc(book) || url(book.cover_url) || '';
     const kind=book.kind==='buku'?'BUKU BACAAN':book.fann==='Belum Diklasifikasikan'?'KITAB':`FANN ${book.fann}`;
     const text=`<div class="book-cover-art"><span class="cover-overline">MAKTABAHRIZQY • ${escape(kind)}</span><span class="cover-title">${escape(book.title)}</span><span class="cover-ornament">❧</span></div>`;
-    return `<div class="book-cover tone-${tone} ${extra}">${text}${image?`<img src="${escape(image)}" loading="lazy" alt="Sampul ${escape(book.title)}">`:''}</div>`;
+    return `<div class="book-cover tone-${tone} ${extra}">${text}${image?`<img src="${escape(image)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="Sampul ${escape(book.title)}">`:''}</div>`;
   }
   function bookCard(book) {
     const status=book.status==='selesai'?'Selesai':book.status==='sedang'?'Sedang dibaca':'Belum dibaca';
@@ -254,7 +255,7 @@
         <div class="field"><label for="book-fann">Fann / kategori</label><select id="book-fann" name="fann">${fannOptions(b.fann)}</select></div>
         <div class="field"><label for="book-total">Jumlah halaman</label><input id="book-total" name="total_pages" type="number" min="0" max="100000" value="${Number(b.total_pages)||0}"></div>
         <div class="field wide"><label for="book-pdf">Tautan PDF (opsional)</label><input id="book-pdf" name="pdf_url" type="url" maxlength="1500" value="${escape(b.pdf_url)}" placeholder="https://drive.google.com/file/d/..."><span class="field-hint">Progres otomatis saat PDF berhasil ditampilkan di pembaca web. Untuk Google Drive privat gunakan halaman manual atau pilih PDF dari perangkat.</span></div>
-        <div class="field wide"><label for="book-cover">Tautan gambar sampul (opsional)</label><input id="book-cover" name="cover_url" type="url" maxlength="1500" value="${escape(b.cover_url)}" placeholder="https://.../cover.jpg"></div>
+        <div class="field wide"><label for="book-cover">Tautan gambar sampul (opsional)</label><input id="book-cover" name="cover_url" type="url" maxlength="1500" value="${escape(url(b.cover_url))}" placeholder="https://.../cover.jpg"><span class="field-hint">Cover lokal / halaman pertama PDF: simpan bacaan lalu buka Detail → Kelola Cover. Cover tersimpan pribadi di browser dan ikut sinkron Google jika login.</span></div>
         <div class="field wide"><label for="book-notes">Catatan pribadi</label><textarea id="book-notes" name="notes" maxlength="4000" placeholder="Catatan singkat tentang bacaan ini...">${escape(b.notes)}</textarea></div>
         ${edit?`<div class="field"><label for="book-status">Status</label><select id="book-status" name="status"><option value="belum" ${b.status==='belum'?'selected':''}>Belum dibaca</option><option value="sedang" ${b.status==='sedang'?'selected':''}>Sedang dibaca</option><option value="selesai" ${b.status==='selesai'?'selected':''}>Selesai</option></select></div>`:''}
       </div><div class="modal-actions"><button type="button" data-action="close" class="btn btn-ghost">Batal</button><button type="submit" class="btn btn-primary">${ico('check')} ${edit?'Simpan Perubahan':'Tambah ke Koleksi'}</button></div></form></div></div>`;
@@ -268,9 +269,40 @@
     if (external) links.push(`<button type="button" class="btn btn-primary" data-action="read" data-id="${escape(book.id)}">${ico('book-open')} Baca dalam Web</button>`);
     links.push(`<button type="button" class="btn btn-secondary" data-action="open-local" data-id="${escape(book.id)}">${ico('upload')} Pilih PDF dari Perangkat</button>`);
     if (external) links.push(`<a href="${escape(external)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">${ico('link')} Buka Tautan PDF ${ico('arrow-up-right')}</a>`);
+    const coverTools=`<section class="detail-cover-tools">
+      <h4>Kelola Cover</h4>
+      <p>PDF Drive akan dicoba tampil sebagai pratinjau halaman pertama. Jika gagal, pilih PDF dari perangkat untuk membuat cover otomatis, atau unggah JPG/PNG/WebP.</p>
+      <div class="cover-tool-actions">
+        ${external?`<button type="button" class="btn btn-secondary" data-action="cover-auto-link" data-id="${escape(book.id)}">${ico('refresh')} Ambil dari Tautan</button>`:''}
+        <button type="button" class="btn btn-secondary" data-action="cover-pdf-local" data-id="${escape(book.id)}">${ico('book-open')} Cover dari PDF Lokal</button>
+        <button type="button" class="btn btn-secondary" data-action="cover-image-local" data-id="${escape(book.id)}">${ico('upload')} Upload Cover Lokal</button>
+        ${book.cover_url?`<button type="button" class="btn btn-ghost" data-action="cover-remove" data-id="${escape(book.id)}">Hapus cover pilihan</button>`:''}
+      </div>
+      <small>Cover dibuat ringkas dan tersimpan bersama catatan di browser; jika login Google aktif, cover pilihan ikut tersinkron melalui Drive aplikasi. Tidak ada PDF asli yang diunggah.</small>
+    </section>`;
     $('#dialog-root').innerHTML=`<div class="modal-shade" data-dismiss="true"><div class="modal" role="dialog" aria-modal="true" aria-label="Detail ${escape(book.title)}"><div class="modal-top"><div class="eyebrow">DETAIL BACAAN</div><button type="button" class="icon-btn" data-action="close" aria-label="Tutup">${ico('x')}</button></div><div class="detail-layout">${coverMarkup(book)}<div><div class="detail-topline">${escape(book.kind==='buku'?'BUKU BACAAN':'KITAB · FANN '+book.fann)}</div><h2 class="detail-name">${escape(book.title)}</h2><div class="detail-author">${escape(book.author||'Pengarang belum dicatat')}</div><div class="detail-chips"><span class="detail-chip">${escape(book.status==='belum'?'Belum dibaca':book.status==='sedang'?'Sedang dibaca':'Selesai')}</span><span class="detail-chip">${book.total_pages?'Total '+book.total_pages+' halaman':'Halaman belum diketahui'}</span></div>${progressMarkup(book)}${book.notes?`<p class="detail-note">${escape(book.notes)}</p>`:''}<div class="detail-actions">${links.join('')}</div><p class="field-hint">PDF tidak diunggah ke situs. Progres otomatis berlaku hanya jika PDF berhasil dirender di sini; pembukaan tautan eksternal tidak dapat dilacak.</p></div></div>
     <div class="detail-progress"><h4>Tandai halaman terakhir secara manual</h4><div class="progress-inline"><span>Halaman</span><input type="number" id="manual-page" min="0" max="${book.total_pages||100000}" value="${book.current_page}" aria-label="Halaman terakhir dibaca"><span>${book.total_pages?'dari '+book.total_pages+' halaman':'belum ada total halaman'}</span><button type="button" class="btn btn-secondary" data-action="save-progress" data-id="${escape(book.id)}">${ico('check')} Simpan Progres</button></div></div>
-    <div class="modal-actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="${escape(book.id)}">${ico('trash')} Hapus dari Katalog</button><button type="button" class="btn btn-secondary" data-action="edit" data-id="${escape(book.id)}">${ico('edit')} Ubah Data</button></div></div></div>`;
+    ${coverTools}<div class="modal-actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="${escape(book.id)}">${ico('trash')} Hapus dari Katalog</button><button type="button" class="btn btn-secondary" data-action="edit" data-id="${escape(book.id)}">${ico('edit')} Ubah Data</button></div></div></div>`;
+  }
+  function saveChosenCover(book, cover, pages=0) {
+    if(!window.MAKTABAH_COVERS) throw new Error('Modul cover belum termuat.');
+    if(cover && !window.MAKTABAH_COVERS.safeCover(cover)) throw new Error('Format cover tidak aman atau terlalu besar.');
+    const prior=state.books;
+    const current=prior.find(x=>x.id===book.id);
+    if(!current) throw new Error('Bacaan tidak ditemukan.');
+    const updated={...current,cover_url:cover,updated_at:new Date().toISOString()};
+    if(pages && !updated.total_pages)updated.total_pages=pages;
+    const next=prior.map(x=>x.id===book.id?updated:x);
+    if(JSON.stringify(next).length>window.MAKTABAH_COVERS.MAX_BOOKS_JSON)throw new Error('Ukuran koleksi terlalu besar untuk cover tambahan. Hapus cover lain atau simpan cadangan.');
+    state.books=next;
+    if(!mockSave()){
+      state.books=prior;
+      storage.set(BOOKS_KEY,JSON.stringify(prior));
+      throw new Error('Ruang penyimpanan browser penuh. Cover tidak disimpan; coba gambar lebih kecil.');
+    }
+    renderBody();
+    if(state.dialog?.type==='detail'&&state.dialog?.id===book.id) detail(updated);
+    return updated;
   }
   function readerMarkup() {
     const r=state.viewer;if(!r)return '';
@@ -286,6 +318,13 @@
       const source=file?{data:new Uint8Array(await file.arrayBuffer())}:{url:url(book.pdf_url)};
       const doc=await pdfjsLib.getDocument(source).promise;
       if (!doc.numPages) throw new Error('Tidak ada halaman.');
+      // A local PDF can automatically supply its first page as cover.
+      if(file && !book.cover_url && window.MAKTABAH_COVERS) {
+        try {
+          const cover=await window.MAKTABAH_COVERS.fromLoadedPdf(doc);
+          book=saveChosenCover(book,cover,doc.numPages);
+        } catch(error) { console.warn('Cover otomatis dilewati:',error); }
+      }
       book.total_pages=doc.numPages;
       mockSave();
       const r={book,pdf:doc,total:doc.numPages,page:Math.min(doc.numPages,Math.max(1,book.current_page||1)),renderEpoch:0,renderTask:null};
@@ -363,7 +402,7 @@
       id:typeof b.id==='string' && /^[A-Za-z0-9_-]{3,120}$/.test(b.id) ? b.id : 'impor-'+index+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now()),
       title,author:String(b.author||'').slice(0,200),kind:b.kind==='buku'?'buku':'kitab',
       fann:String(b.fann||'Belum Diklasifikasikan').slice(0,100),
-      pdf_url:url(b.pdf_url)||'',cover_url:url(b.cover_url)||'',notes:String(b.notes||'').slice(0,4000),
+      pdf_url:url(b.pdf_url)||'',cover_url:window.MAKTABAH_COVERS?.safeCover(b.cover_url)||url(b.cover_url)||'',notes:String(b.notes||'').slice(0,4000),
       total_pages:total,current_page:page,status:['belum','sedang','selesai'].includes(b.status)?b.status:(page?'sedang':'belum'),
       last_read_at:typeof b.last_read_at==='string'?b.last_read_at:null,
       created_at:typeof b.created_at==='string'?b.created_at:new Date().toISOString(),
@@ -460,6 +499,22 @@
     if(a==='backup'){exportBackup();return;}
     if(a==='import-drive-links'){$('#private-link-file').click();return;}
     if(a==='open-local'&&b){state.pendingFileBookId=b.id;$('#local-pdf-input').click();return;}
+    if(a==='cover-pdf-local'&&b){state.pendingCoverPdfId=b.id;$('#cover-pdf-input').click();return;}
+    if(a==='cover-image-local'&&b){state.pendingCoverImageId=b.id;$('#cover-image-input').click();return;}
+    if(a==='cover-remove'&&b) {
+      if(!window.confirm('Hapus cover pilihan untuk bacaan ini? Pratinjau Drive atau sampul teks tetap tersedia.'))return;
+      try{saveChosenCover(b,'');toast('Cover pilihan dihapus.');}catch(error){toast(error.message);}
+      return;
+    }
+    if(a==='cover-auto-link'&&b) {
+      if(!window.MAKTABAH_COVERS){toast('Modul cover belum siap. Muat ulang halaman.');return;}
+      toast('Mencoba membaca halaman pertama dari tautan PDF...');
+      try{
+        const result=await window.MAKTABAH_COVERS.fromPdfUrl(b.pdf_url);
+        saveChosenCover(b,result.cover,result.pages);toast('Cover dari halaman pertama PDF berhasil disimpan.');
+      }catch(error){toast(error.message||'PDF tidak dapat dibaca langsung. Gunakan PDF lokal.');}
+      return;
+    }
     if(a==='edit'&&b){bookForm(b);return;}
     if(a==='read'&&b){await openReader(b);return;}
     if(a==='close-reader'){closeReader();return;}
@@ -489,6 +544,22 @@
     state.pendingFileBookId=null;
     if(file&&book){if(!/\.pdf$/i.test(file.name)&&file.type!=='application/pdf'){toast('Pilih berkas PDF.');return;}await openReader(book,file);}
   });
+  $('#cover-image-input').addEventListener('change',async event=>{
+    const file=event.target.files?.[0];event.target.value='';
+    const book=state.books.find(x=>x.id===state.pendingCoverImageId);state.pendingCoverImageId=null;
+    if(!file||!book)return;
+    toast('Memproses gambar cover di perangkat...');
+    try{const image=await window.MAKTABAH_COVERS.fromImageFile(file);saveChosenCover(book,image);toast('Cover lokal berhasil disimpan.');}
+    catch(error){toast(error.message||'Cover gagal diproses.');}
+  });
+  $('#cover-pdf-input').addEventListener('change',async event=>{
+    const file=event.target.files?.[0];event.target.value='';
+    const book=state.books.find(x=>x.id===state.pendingCoverPdfId);state.pendingCoverPdfId=null;
+    if(!file||!book)return;
+    toast('Membuat cover dari halaman pertama PDF...');
+    try{const result=await window.MAKTABAH_COVERS.fromPdfFile(file);saveChosenCover(book,result.cover,result.pages);toast('Cover PDF halaman pertama berhasil disimpan.');}
+    catch(error){toast(error.message||'PDF tidak dapat dijadikan cover.');}
+  });
   document.addEventListener('input',event=>{
     if(event.target.id==='search-input'){
       const cursor=event.target.selectionStart;
@@ -504,7 +575,11 @@
     if(!data.title){toast('Judul bacaan wajib diisi.');return;}
     if((data.pdf_url&&!url(data.pdf_url))||(data.cover_url&&!url(data.cover_url))){toast('Tautan harus dimulai dengan https:// atau http://');return;}
     const editing=state.dialog?.id;
-    if(editing)data.status=String(fd.get('status')||'belum');
+    if(editing){
+      data.status=String(fd.get('status')||'belum');
+      const previous=state.books.find(b=>b.id===editing);
+      if(!data.cover_url && window.MAKTABAH_COVERS?.safeDataImage(previous?.cover_url))data.cover_url=previous.cover_url;
+    }
     const submit=form.querySelector('button[type=submit]');submit.disabled=true;
     try {
       await api(editing?`/api/books/${encodeURIComponent(editing)}`:'/api/books',editing?'PATCH':'POST',data);

@@ -8,6 +8,7 @@
   <title>Maktabahrizqy — Perpustakaan Digital</title>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./google-sync.css">
+  <link rel="stylesheet" href="./cover-tools.css">
 </head>
 <body data-theme="light">
   <div id="app" class="app-shell">
@@ -72,13 +73,14 @@
       <button type="button" data-nav="collection" class="bottom-link"><span data-icon="library"></span><span>Koleksi Ku</span></button>
     </nav>
   </div>
-  <input id="private-link-file" type="file" accept="application/json,.json" hidden aria-label="Impor tautan PDF Drive pribadi"><input id="local-pdf-input" type="file" accept="application/pdf,.pdf" hidden aria-label="Pilih PDF dari perangkat"><input id="restore-file" type="file" accept="application/json,.json" hidden aria-label="Pilih cadangan koleksi"><div id="dialog-root"></div>
+  <input id="private-link-file" type="file" accept="application/json,.json" hidden aria-label="Impor tautan PDF Drive pribadi"><input id="local-pdf-input" type="file" accept="application/pdf,.pdf" hidden aria-label="Pilih PDF dari perangkat"><input id="restore-file" type="file" accept="application/json,.json" hidden aria-label="Pilih cadangan koleksi"><input id="cover-image-input" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" hidden aria-label="Upload cover dari perangkat"><input id="cover-pdf-input" type="file" accept="application/pdf,.pdf" hidden aria-label="Pilih PDF lokal untuk cover halaman pertama"><div id="dialog-root"></div>
   <div id="toast-root" role="status" aria-live="polite"></div>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer"></script>
   <script src="./catalogue.js" defer></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="./google-config.js" defer></script>
   <script src="./google-sync.js" defer></script>
+  <script src="./cover-tools.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>

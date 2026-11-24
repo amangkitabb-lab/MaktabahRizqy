@@ -1,4 +1,4 @@
-# Maktabahrizqy - GitHub Pages v0.5
+# Maktabahrizqy - GitHub Pages v0.6
 
 Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi Bacaan**, dan **Koleksi Ku**. Berjalan sebagai situs statis di GitHub Pages tanpa Railway. **Login Google bersifat opsional, khusus untuk menyinkronkan koleksi dan progres antarperangkat.**
 
@@ -18,6 +18,14 @@ Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi
 - Jika suatu judul bawaan dihapus, judul tersebut tidak muncul kembali sesudah refresh pada browser yang sama.
 - Ekspor cadangan pribadi dalam JSON tersedia di sidebar dan Jelajahi Bacaan. File cadangan sebaiknya disimpan secara aman.
 
+## Cover otomatis + cover lokal (v0.6)
+
+- Jika judul mempunyai tautan PDF Drive **yang diimpor pribadi**, website **mencoba** memakai pratinjau Drive sebagai cover. Foto/thumbnail Drive bisa gagal jika PDF privat atau pemblokiran lintas situs; jika gagal, cover tipografi yang sudah ada tetap digunakan.
+- Setelah kitab dibuka, bagian **Kelola Cover** menyediakan **Cover dari PDF Lokal** (render halaman pertama memakai PDF.js), **Upload Cover Lokal** (JPG/PNG/WebP), **Ambil dari Tautan** (PDF web yang mengizinkan CORS), dan hapus cover pilihan.
+- **Pilih PDF dari Perangkat** pada pembaca bacaan kini sekaligus membuat cover halaman 1 jika belum ada cover pilihan.
+- Cover pilihan dikompresi dalam browser dan tersimpan sebagai data gambar kecil di metadata koleksi. Karena itu ikut tersinkron privat lewat Google Drive appDataFolder apabila login aktif; **PDF asli tidak dikirim ke hosting atau disalin ke Drive**.
+- Sumber kode GitHub tidak menyimpan file PDF atau tautan privat. Batas ukuran dan panduan lengkap: **[PANDUAN_COVER_DAN_PDF.md](PANDUAN_COVER_DAN_PDF.md)**.
+
 ## Menautkan PDF Drive secara pribadi
 
 Dapatkan **Maktabahrizqy_Tautan_PDF_Pribadi.json** dari percakapan ChatGPT dengan pemilik (file sengaja **tidak** tersedia di repositori publik).
@@ -26,7 +34,7 @@ Dapatkan **Maktabahrizqy_Tautan_PDF_Pribadi.json** dari percakapan ChatGPT denga
 2. Tekan **Impor Tautan PDF**.
 3. Pilih berkas JSON pribadi itu dan konfirmasi.
 4. Tautan akan melengkapi entri yang cocok saja. Tautan yang sudah kamu isi manual tidak ditimpa.
-5. Gunakan **Buka Tautan PDF** untuk Google Drive. Pencatatan otomatis halaman hanya tersedia jika PDF bisa dimuat ke pembaca web, contohnya PDF yang dipilih dari perangkat. Google Drive sering tidak mengizinkan pembacaan silang situs karena aturan CORS.
+5. Sesudah impor, Maktabahrizqy mencoba menampilkan thumbnail Drive sebagai cover (tidak selalu tersedia). Gunakan **Buka Tautan PDF** untuk membaca PDF di Google Drive. Untuk membuat cover halaman pertama yang permanen, buka judul lalu gunakan **Cover dari PDF Lokal**, atau unggah gambar lokal. Pencatatan otomatis halaman hanya tersedia saat PDF dapat dirender di pembaca web.
 
 **Jangan commit JSON pribadi itu ke GitHub.** Jika izin Google Drive mengizinkan orang lain yang memegang tautan mengakses file, perlakukan tautannya sebagai sensitif.
 
@@ -42,4 +50,5 @@ Dapatkan **Maktabahrizqy_Tautan_PDF_Pribadi.json** dari percakapan ChatGPT denga
 
 - Jangan menyimpan password, Google OAuth secret, token, file identitas, atau private JSON di repo.
 - Katalog judul publik tidak berisi tautan PDF Drive. Hak akses folder dan PDF Amangrejeki harus dikelola terpisah; aplikasi sinkronisasi **hanya menggunakan appDataFolder**, bukan mengubah izin arsip sumber.
-- Penambahan judul ke katalog tidak mengubah izin berbagi PDF Drive dan tidak memindahkan, menyalin, atau mengganti nama PDF sumber.
+- Penambahan judul, tautan atau cover ke katalog tidak mengubah izin berbagi PDF Drive dan tidak memindahkan, menyalin, atau mengganti nama PDF sumber.
+- Gambar/cover yang diperoleh dari perangkat tetap tersimpan hanya pada koleksi pribadi dan sinkronisasi akun, bukan pada katalog publik GitHub. Hindari memilih gambar berisi data pribadi.
