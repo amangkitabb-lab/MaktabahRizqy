@@ -1,4 +1,4 @@
-/* Maktabahrizqy public shelf: file titles only; PDF links never appear in this file. */
+/* Public title catalogue only. Private Google Drive PDF links are never included. */
 window.MAKTABAH_SEED_BOOKS = [
   {
     "id": "mb-640fc55e",
@@ -172,7 +172,7 @@ window.MAKTABAH_SEED_BOOKS = [
     "id": "mb-5f1dcc3b",
     "title": "Syamsul Muniroh 1 319 - 412 (Qashar)",
     "kind": "kitab",
-    "fann": "Fiqh",
+    "fann": "Maraji' Fiqh Travelling",
     "author": ""
   },
   {
@@ -1244,6 +1244,69 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "Otodidak Belajar Pemrograman untuk Pemula (Jubilee Enterprise)",
     "kind": "buku",
     "fann": "BUKU ROOT",
+    "author": ""
+  },
+  {
+    "id": "mft-141d6a30",
+    "title": "Bajuri 2",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
+    "author": ""
+  },
+  {
+    "id": "mft-0d73bbe4",
+    "title": "Majmu'",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
+    "author": ""
+  },
+  {
+    "id": "mft-28a281e2",
+    "title": "Fiqh Syari Muyassar",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
+    "author": ""
+  },
+  {
+    "id": "mft-fcd5613f",
+    "title": "FIA 315-361",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
+    "author": ""
+  },
+  {
+    "id": "mft-d88ab840",
+    "title": "mfk15 - 284 - 292 (Jam'u sholawat)",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
+    "author": ""
+  },
+  {
+    "id": "mft-3295bb23",
+    "title": "mfk27 - 266 - 288 (Sholat Musafir)",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
+    "author": ""
+  },
+  {
+    "id": "mft-f79ac112",
+    "title": "Fathul Alam 97 - 135",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
+    "author": ""
+  },
+  {
+    "id": "mft-335fce63",
+    "title": "Nihayat Almuhtaj02 236 - 280",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
+    "author": ""
+  },
+  {
+    "id": "mft-076a9652",
+    "title": "mfk25 - 26 - 44 (Safar)",
+    "kind": "kitab",
+    "fann": "Maraji' Fiqh Travelling",
     "author": ""
   }
 ];

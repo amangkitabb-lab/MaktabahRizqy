@@ -1,4 +1,4 @@
-# Maktabahrizqy - GitHub Pages v0.7
+# Maktabahrizqy - GitHub Pages v0.8
 
 Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi Bacaan**, dan **Koleksi Ku**. Berjalan sebagai situs statis di GitHub Pages tanpa Railway. **Login Google bersifat opsional, khusus untuk menyinkronkan koleksi dan progres antarperangkat.**
 
@@ -17,6 +17,28 @@ Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi
 - Rilis v0.4 menambahkan katalog awal sekali ke data lokal yang sudah ada, tanpa menghapus bacaan/progres yang telah tersimpan.
 - Jika suatu judul bawaan dihapus, judul tersebut tidak muncul kembali sesudah refresh pada browser yang sama.
 - Ekspor cadangan pribadi dalam JSON tersedia di sidebar dan Jelajahi Bacaan. File cadangan sebaiknya disimpan secara aman.
+
+## Maraji' Fiqh Travelling (v0.8)
+
+- Rak khusus **Maraji' Fiqh Travelling** berisi **10 referensi PDF** dari folder yang dipilih pengguna. Satu judul (Syamsul Muniroh 1, Qashar) sudah ada sehingga **9 entri baru** ditambahkan. Total katalog sekarang **187 judul**, kategori khusus 10 judul tanpa duplikat.
+- Migrasi yang aman menambahkan kategori pada browser lama tanpa menghapus progres, catatan, tautan atau gambar sampul yang sudah tersimpan.
+- Semua PDF tetap berada di Google Drive sumber. **Tidak ada link/ID PDF privat dalam source code publik.** Gunakan file impor pribadi `Maktabahrizqy_Maraji_Fiqh_Travelling_10_Tautan_Pribadi.json` dari percakapan untuk memasukkan 10 tautan lewat **Jelajahi Bacaan → Impor Tautan PDF**.
+- Cover untuk kategori khusus **ditentukan sendiri oleh pemilik** melalui **Upload Cover Lokal** (tidak memuat thumbnail otomatis dari Drive). Cover lama yang sebelumnya dipasang tidak dihapus.
+- Di Web Utama, rak khusus disajikan sebagai barisan buku horizontal yang dapat digeser. Kategori bisa dicari melalui filter dan tampil sebagai satu rak di Koleksi Ku.
+
+## Tracker khatam (v0.8)
+
+- Pada setiap detail kitab tersedia tombol **+1 Khatam**. Jumlahnya tampil sebagai label di kartu bacaan dan stat **Total Khatam** di halaman utama.
+- Pada **Ubah Data**, kolom **Sudah khatam (kali)** dapat digunakan untuk menambah hitungan awal atau mengoreksi jumlah.
+- Khatam adalah tindakan manual setelah menuntaskan kitab, bukan otomatis bertambah saat mencapai halaman terakhir. Penambahan khatam **tidak menghapus nomor halaman atau progres jilid**.
+- Saat Google Sync aktif, riwayat setiap tekan +1 disimpan sebagai catatan ber-ID unik, sehingga penambahan dari HP dan laptop bisa digabung tanpa terhitung ganda. Koreksi manual menggantikan hitungan lama dengan penanda waktu.
+- Khatam ikut dibawa oleh ekspor/impor cadangan JSON serta disinkronkan privat ke Google Drive appDataFolder.
+
+## Tipografi dan gaya editorial (v0.8)
+
+- Mengikuti hierarki visual F15 Library (sebagai referensi, bukan menyalin aset/desain persis): **Inter** (UI Indonesia), **Fraunces** (judul), **Gelasio** (teks bacaan), **Tajawal** (Arab).
+- Font dimuat dari layanan Google Fonts saat browser tersambung. Bila tidak tersedia, browser menggunakan font fallback. Tidak ada file font pihak ketiga yang diunggah ke GitHub.
+- Rak horizontal, kartu cover tegak utuh, tag khatam dan aksen oranye lembut menambah nuansa perpustakaan editorial. Mode terang/gelap dan nama navigasi **Web Utama**, **Jelajahi Bacaan**, **Koleksi Ku** tidak berubah.
 
 ## Juz/Jilid dan progres per-volume (v0.7)
 

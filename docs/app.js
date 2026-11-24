@@ -1,4 +1,4 @@
-/* Maktabahrizqy GitHub Pages v0.7 — full portrait covers and per-juz/jilid progress. */
+/* Maktabahrizqy GitHub Pages v0.8 — Maraji' Fiqh Travelling, khatam count, F15-inspired typography. */
 (() => {
   'use strict';
   const PREVIEW = true; // Reuse local-data operations; there is no backend in Pages edition.
@@ -44,9 +44,11 @@
     get: key => {try {return window.localStorage.getItem(key) ?? memoryStore[key] ?? null} catch (_) {return memoryStore[key] ?? null}},
     set: (key,value) => {memoryStore[key] = value;try {window.localStorage.setItem(key,value);return true} catch (_) {return false}},
   };
-  const FANN = ['Belum Diklasifikasikan', 'Fiqh', 'Aqidah', 'Mantiq', 'Nahwu', 'Sharaf', 'Ushul Fiqh', 'Kaidah Fiqh', 'Tafsir', 'Hadis', 'Tasawuf', 'Akhlak', 'Doa & Wirid', 'Faraidh', 'Tajwid', 'Balaghah', 'Sejarah', 'Bahasa Arab', 'Lainnya'];
+  const FANN = ["Maraji' Fiqh Travelling", 'Belum Diklasifikasikan', 'Fiqh', 'Aqidah', 'Mantiq', 'Nahwu', 'Sharaf', 'Ushul Fiqh', 'Kaidah Fiqh', 'Tafsir', 'Hadis', 'Tasawuf', 'Akhlak', 'Doa & Wirid', 'Faraidh', 'Tajwid', 'Balaghah', 'Sejarah', 'Bahasa Arab', 'Lainnya'];
   const demoBooks = Array.isArray(window.MAKTABAH_SEED_BOOKS) ? window.MAKTABAH_SEED_BOOKS : [];
   const SEED_FLAG = 'maktabahrizqy_seed_v04';
+  const MARAJI = "Maraji' Fiqh Travelling";
+  const MARAJI_SEED_FLAG = 'maktabahrizqy_maraji_v08';
   const BOOKS_KEY = 'maktabahrizqy_browser_books_v1';
   const DELETED_KEY = 'maktabahrizqy_browser_deleted_v1';
   const readDeletions = () => {
@@ -85,7 +87,25 @@
       storage.set(BOOKS_KEY,JSON.stringify(saved));
       storage.set(SEED_FLAG,'1');
     }
-    return saved.map(b=>window.MAKTABAH_VOLUMES?.normalize(b)||b);
+    // One-time additive migration of the special Maraji' shelf, without losing
+    // covers, annotations, per-volume progress or earlier link imports.
+    if(storage.get(MARAJI_SEED_FLAG)!=='1'){
+      const now=new Date().toISOString();
+      const cleanTitle=value=>String(value||'').toLocaleLowerCase('id-ID').trim().replace(/\s+/g,' ');
+      for(const seed of demoBooks.filter(x=>x.fann===MARAJI)){
+        const already=saved.find(b=>b.id===seed.id||cleanTitle(b.title)===cleanTitle(seed.title));
+        if(already){
+          if(already.fann!==MARAJI){already.fann=MARAJI;already.updated_at=now;}
+        }else{
+          saved.push({...seed,author:seed.author||'',pdf_url:'',cover_url:'',notes:'',
+            total_pages:0,current_page:0,status:'belum',last_read_at:null,
+            created_at:now,updated_at:now,drive_file_id:null});
+        }
+      }
+      storage.set(BOOKS_KEY,JSON.stringify(saved));
+      storage.set(MARAJI_SEED_FLAG,'1');
+    }
+    return saved.map(b=>window.MAKTABAH_KHATAM.normalize(window.MAKTABAH_VOLUMES.normalize(b)));
   };
   const mockSave = () => {
     const stored=storage.set(BOOKS_KEY, JSON.stringify(state.books));
@@ -101,7 +121,7 @@
       const match = path.match(/^\/api\/books\/([^/]+)(\/progress)?$/);
       if (method === 'POST' && path === '/api/books') {
         const now=new Date().toISOString();
-        const book=window.MAKTABAH_VOLUMES.normalize({...data,id:'lokal-'+(crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(36).slice(2)),status:Number(data.current_page)?'sedang':'belum',drive_file_id:null,last_read_at:Number(data.current_page)?now:null,created_at:now,updated_at:now});
+        const book=window.MAKTABAH_KHATAM.normalize(window.MAKTABAH_VOLUMES.normalize({...data,id:'lokal-'+(crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(36).slice(2)),status:Number(data.khatam_count)>0?'selesai':Number(data.current_page)?'sedang':'belum',drive_file_id:null,last_read_at:Number(data.current_page)?now:null,created_at:now,updated_at:now}));
         state.books.unshift(book); mockSave(); return {book};
       }
       if (match) {
@@ -147,13 +167,14 @@
     const tone=[...book.title].reduce((a,c)=>a+c.charCodeAt(0),0)%6;
     const image = window.MAKTABAH_COVERS?.coverSrc(book) || url(book.cover_url) || '';
     const kind=book.kind==='buku'?'BUKU BACAAN':book.fann==='Belum Diklasifikasikan'?'KITAB':`FANN ${book.fann}`;
-    const text=`<div class="book-cover-art"><span class="cover-overline">MAKTABAHRIZQY • ${escape(kind)}</span><span class="cover-title">${escape(book.title)}</span><span class="cover-ornament">❧</span></div>`;
+    const lang=/[\u0600-\u06FF]/.test(book.title)?' lang="ar" dir="rtl"':'';
+    const text=`<div class="book-cover-art"><span class="cover-overline">MAKTABAHRIZQY • ${escape(kind)}</span><span class="cover-title"${lang}>${escape(book.title)}</span><span class="cover-ornament">❧</span></div>`;
     return `<div class="book-cover tone-${tone} ${extra}">${text}${image?`<img src="${escape(image)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="Sampul ${escape(book.title)}">`:''}</div>`;
   }
   function bookCard(book) {
     const status=book.status==='selesai'?'Selesai':book.status==='sedang'?'Sedang dibaca':'Belum dibaca';
     const kind=book.kind==='buku'?'Buku Bacaan':`Kitab · ${book.fann}`;
-    return `<button type="button" class="book-card" data-open="${escape(book.id)}" aria-label="Lihat ${escape(book.title)}">${coverMarkup(book)}<span class="cover-status">${status}</span><div class="book-meta"><span class="card-overline">${escape(kind)}</span><span class="book-name">${escape(book.title)}</span><span class="book-author">${escape(book.author||'Pengarang belum dicatat')}</span>${progressMarkup(book)}</div></button>`;
+    return `<button type="button" class="book-card" data-open="${escape(book.id)}" aria-label="Lihat ${escape(book.title)}">${coverMarkup(book)}<span class="cover-status">${status}</span><div class="book-meta"><span class="card-overline">${escape(kind)}</span><span class="book-name"${/[\u0600-\u06FF]/.test(book.title)?' lang="ar" dir="rtl"':''}>${escape(book.title)}</span><span class="book-author"${/[\u0600-\u06FF]/.test(book.author||'')?' lang="ar" dir="rtl"':''}>${escape(book.author||'Pengarang belum dicatat')}</span>${window.MAKTABAH_KHATAM.normalize(book).khatam_count?`<span class="khatam-chip">✦ Khatam ×${window.MAKTABAH_KHATAM.normalize(book).khatam_count}</span>`:''}${progressMarkup(book)}</div></button>`;
   }
   const grid = books => books.length ? `<div class="book-grid">${books.map(bookCard).join('')}</div>` : emptyMarkup();
   function emptyMarkup(mode='list') {
@@ -166,15 +187,18 @@
     const underway=list.filter(x=>x.status==='sedang');
     const finished=list.filter(x=>x.status==='selesai');
     const pages=list.reduce((sum,b)=>sum+Object.values(window.MAKTABAH_VOLUMES.entriesOf(b)).reduce((v,p)=>v+(Number(p.page)||0),0),0);
+    const khatamTotal=list.reduce((sum,b)=>sum+window.MAKTABAH_KHATAM.normalize(b).khatam_count,0);
+    const maraji=list.filter(b=>b.fann===MARAJI);
     const recent=[...underway].sort((a,b)=>(b.last_read_at||'').localeCompare(a.last_read_at||''));
     const current=recent[0];
     const latest=[...list].sort((a,b)=>(b.updated_at||'').localeCompare(a.updated_at||'')).slice(0,4);
     return `
       ${pageHeader('Selamat datang di <em>rak bacamu.</em>','Ruang tenang untuk menyimpan, menemukan, dan melanjutkan setiap bacaan.','RAK DIGITALMU')}
       <section class="hero"><div class="hero-content"><div class="eyebrow">مكتبة رزقي • MAKTABAHRIZQY</div><h2 class="hero-title">Satu rak. <em>Seribu</em> pengetahuan.</h2><p class="hero-description">Simpan kitab dan buku pilihanmu. Kembali ke halaman terakhir, kapan pun kamu ingin melanjutkan.</p><button class="btn hero-action" type="button" data-nav="explore">Jelajahi Bacaan ${ico('arrow-right')}</button></div><div class="hero-art" aria-hidden="true"><div class="hero-card"><span class="arabic">اقرأ</span></div><span class="hero-vertical">READ · REFLECT · REMEMBER</span></div></section>
-      <div class="stats">${stat('Total Koleksi',list.length,'Kitab & buku tercatat','layers')}${stat('Sedang Dibaca',underway.length,'Bacaan yang berjalan','book')}${stat('Selesai Dibaca',finished.length,'Bacaan tuntas','check')}${stat('Halaman Terbaca',pages.toLocaleString('id-ID'),'Terakumulasi di koleksi','clock')}</div>
+      <div class="stats">${stat('Total Koleksi',list.length,'Kitab & buku tercatat','layers')}${stat('Sedang Dibaca',underway.length,'Bacaan yang berjalan','book')}${stat('Selesai Dibaca',finished.length,'Bacaan tuntas','check')}${stat('Halaman Terbaca',pages.toLocaleString('id-ID'),'Terakumulasi di koleksi','clock')}${stat('Total Khatam',khatamTotal.toLocaleString('id-ID'),'Khatam seluruh kitab','check')}</div>
       ${current?`<section class="section"><div class="section-head"><div><h2>Lanjutkan membaca</h2><p>Lanjut tepat dari tempat kamu berhenti.</p></div></div><div class="continue-panel">${coverMarkup(current)}<div class="continue-copy"><div class="eyebrow">BACAAN TERAKHIR</div><h3>${escape(current.title)}</h3><p>${escape(current.author||current.fann)}</p>${progressMarkup(current)}</div><button type="button" class="btn btn-primary" data-open="${escape(current.id)}">Lanjutkan ${ico('arrow-right')}</button></div></section>`:''}
       <div class="catalogue-hint">Katalog awal diisi dari judul kitab dan buku yang teridentifikasi di arsip Drive. Tautan PDF tidak dipublikasikan. Untuk menautkan PDF secara pribadi, buka Jelajahi Bacaan lalu pilih Impor Tautan PDF.</div>
+      ${maraji.length?`<section class="section maraji-section"><div class="section-head"><div><span class="section-kicker">RAK KHUSUS</span><h2>Maraji' Fiqh Travelling</h2><p>${maraji.length} rujukan fiqh safar · cover ditentukan sendiri</p></div><button type="button" class="plain-link" data-action="open-maraji">Lihat semua ${ico('arrow-right')}</button></div><div class="maraji-scroll">${maraji.map(bookCard).join('')}</div></section>`:''}
       <section class="section"><div class="section-head"><div><h2>${list.length?'Baru di rakmu':'Mulai membangun rakmu'}</h2><p>${list.length?'Bacaan yang terakhir kamu simpan atau perbarui.':'Semua kitab dan buku nantinya tersusun rapi di sini.'}</p></div>${list.length?`<button class="plain-link" data-nav="collection" type="button">Lihat Koleksi Ku ${ico('arrow-up-right')}</button>`:''}</div>${grid(latest)}</section>`;
   }
   function exploreMarkup() {
@@ -194,8 +218,8 @@
   function collectionMarkup() {
     const visible=state.books.filter(b=>state.kind==='Semua'||(state.kind==='Kitab'?b.kind==='kitab':b.kind==='buku'));
     const groups={};
-    visible.forEach(b=>{const key=b.kind==='buku'?'Buku Bacaan':`Kitab · Fann ${b.fann}`;(groups[key]||=[]).push(b);});
-    const order=Object.keys(groups).sort((a,b)=>a==='Buku Bacaan'?1:b==='Buku Bacaan'?-1:a.localeCompare(b,'id'));
+    visible.forEach(b=>{const key=b.kind==='buku'?'Buku Bacaan':b.fann===MARAJI?MARAJI:`Kitab · Fann ${b.fann}`;(groups[key]||=[]).push(b);});
+    const order=Object.keys(groups).sort((a,b)=>a===MARAJI?-1:b===MARAJI?1:a==='Buku Bacaan'?1:b==='Buku Bacaan'?-1:a.localeCompare(b,'id'));
     return `${pageHeader('Koleksi <em>Ku</em>','Rak pribadi yang dibagi menurut buku bacaan dan disiplin keilmuan kitab.','RAK BACAANMU')}
     <div class="collection-intro"><div class="collection-banner"><div><h3>Kitab</h3><p>Fiqh, Aqidah, Mantiq, Nahwu, Sharaf, dan berbagai fann lainnya.</p></div><div class="banner-mark">الكتب</div></div><div class="collection-banner"><div><h3>Buku Bacaan</h3><p>Nonfiksi, sejarah, pengembangan diri, dan bacaan lainnya.</p></div><div class="banner-mark">01</div></div></div>
     <div class="filter-row">${['Semua','Kitab','Buku Bacaan'].map(f=>`<button type="button" class="filter-chip ${state.kind===f?'active':''}" data-kind="${f}">${f}</button>`).join('')}</div>
@@ -248,7 +272,7 @@
   const fannOptions=(current)=>FANN.map(f=>`<option value="${escape(f)}" ${f===current?'selected':''}>${escape(f)}</option>`).join('');
   function bookForm(book=null) {
     const edit=!!book;
-    const b=window.MAKTABAH_VOLUMES.normalize(book||{title:'',author:'',kind:'kitab',fann:'Belum Diklasifikasikan',total_pages:0,pdf_url:'',cover_url:'',notes:'',status:'belum'});
+    const b=window.MAKTABAH_KHATAM.normalize(window.MAKTABAH_VOLUMES.normalize(book||{title:'',author:'',kind:'kitab',fann:'Belum Diklasifikasikan',total_pages:0,pdf_url:'',cover_url:'',notes:'',status:'belum'}));
     state.volumeFormDraft=b;
     state.volumeFormSelected=b.current_volume;
     state.dialog={type:'form',id:book?.id||null};
@@ -266,6 +290,8 @@
         <div class="field wide"><small class="field-hint">Halaman terakhir disimpan terpisah untuk tiap juz/jilid. Jika berganti jilid, nomor halaman jilid sebelumnya tetap tersimpan.</small></div>
         <div class="field wide"><label for="book-pdf">Tautan PDF (opsional)</label><input id="book-pdf" name="pdf_url" type="url" maxlength="1500" value="${escape(b.pdf_url)}" placeholder="https://drive.google.com/file/d/..."><span class="field-hint">Progres otomatis saat PDF berhasil ditampilkan di pembaca web. Untuk Google Drive privat gunakan halaman manual atau pilih PDF dari perangkat.</span></div>
         <div class="field wide"><label for="book-cover">Tautan gambar sampul (opsional)</label><input id="book-cover" name="cover_url" type="url" maxlength="1500" value="${escape(url(b.cover_url))}" placeholder="https://.../cover.jpg"><span class="field-hint">Cover lokal / halaman pertama PDF: simpan bacaan lalu buka Detail → Kelola Cover. Cover tersimpan pribadi di browser dan ikut sinkron Google jika login.</span></div>
+        <div class="field"><label for="book-khatam">Sudah khatam (kali)</label><input id="book-khatam" name="khatam_count" type="number" min="0" max="9999" step="1" value="${b.khatam_count||0}"></div>
+        <div class="field wide"><span class="field-hint">Jumlah khatam tersimpan untuk setiap judul. Tambahkan khatam baru dari Detail Bacaan (+1 Khatam) agar tercatat sebagai peristiwa tersendiri.</span></div>
         <div class="field wide"><label for="book-notes">Catatan pribadi</label><textarea id="book-notes" name="notes" maxlength="4000" placeholder="Catatan singkat tentang bacaan ini...">${escape(b.notes)}</textarea></div>
         ${edit?`<div class="field"><label for="book-status">Status</label><select id="book-status" name="status"><option value="belum" ${b.status==='belum'?'selected':''}>Belum dibaca</option><option value="sedang" ${b.status==='sedang'?'selected':''}>Sedang dibaca</option><option value="selesai" ${b.status==='selesai'?'selected':''}>Selesai</option></select></div>`:''}
       </div><div class="modal-actions"><button type="button" data-action="close" class="btn btn-ghost">Batal</button><button type="submit" class="btn btn-primary">${ico('check')} ${edit?'Simpan Perubahan':'Tambah ke Koleksi'}</button></div></form></div></div>`;
@@ -300,7 +326,7 @@
   }
   function detail(book) {
     if (!book) return;
-    book=window.MAKTABAH_VOLUMES.normalize(book);
+    book=window.MAKTABAH_KHATAM.normalize(window.MAKTABAH_VOLUMES.normalize(book));
     state.dialog={type:'detail',id:book.id};
     const links=[];
     const external=url(book.pdf_url);
@@ -318,9 +344,17 @@
       </div>
       <small>Cover dibuat ringkas dan tersimpan bersama catatan di browser; jika login Google aktif, cover pilihan ikut tersinkron melalui Drive aplikasi. Tidak ada PDF asli yang diunggah.</small>
     </section>`;
-    $('#dialog-root').innerHTML=`<div class="modal-shade" data-dismiss="true"><div class="modal" role="dialog" aria-modal="true" aria-label="Detail ${escape(book.title)}"><div class="modal-top"><div class="eyebrow">DETAIL BACAAN</div><button type="button" class="icon-btn" data-action="close" aria-label="Tutup">${ico('x')}</button></div><div class="detail-layout">${coverMarkup(book)}<div><div class="detail-topline">${escape(book.kind==='buku'?'BUKU BACAAN':'KITAB · FANN '+book.fann)}</div><h2 class="detail-name">${escape(book.title)}</h2><div class="detail-author">${escape(book.author||'Pengarang belum dicatat')}</div><div class="detail-chips"><span class="detail-chip">${escape(book.status==='belum'?'Belum dibaca':book.status==='sedang'?'Sedang dibaca':'Selesai')}</span><span class="detail-chip">${book.total_pages?'Total '+book.total_pages+' halaman':'Halaman belum diketahui'}</span>${book.total_volumes>1?`<span class="detail-chip">Juz/Jilid ${book.current_volume} dari ${book.total_volumes}</span>`:''}</div>${progressMarkup(book)}${book.notes?`<p class="detail-note">${escape(book.notes)}</p>`:''}<div class="detail-actions">${links.join('')}</div><p class="field-hint">PDF tidak diunggah ke situs. Progres otomatis berlaku hanya jika PDF berhasil dirender di sini; pembukaan tautan eksternal tidak dapat dilacak.</p></div></div>
-    <div class="detail-progress"><h4>Tandai juz / jilid dan halaman terakhir</h4><div class="progress-inline volume-progress-inline"><label for="manual-volume">Juz / Jilid</label><input type="number" id="manual-volume" min="1" max="${book.total_volumes}" step="1" value="${book.current_volume}" aria-label="Nomor juz atau jilid"><span>dari ${book.total_volumes}</span><label for="manual-page">Halaman</label><input type="number" id="manual-page" min="0" max="${book.total_pages||100000}" value="${book.current_page}" aria-label="Halaman terakhir dibaca"><span id="manual-page-hint">${book.total_pages?'dari '+book.total_pages+' halaman':'belum ada total halaman'}</span><button type="button" class="btn btn-secondary" data-action="save-progress" data-id="${escape(book.id)}">${ico('check')} Simpan Progres</button></div><small class="field-hint">Pindah Juz / Jilid untuk melihat atau mencatat halaman terakhir pada jilid tersebut.</small></div>
-    ${coverTools}<div class="modal-actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="${escape(book.id)}">${ico('trash')} Hapus dari Katalog</button><button type="button" class="btn btn-secondary" data-action="edit" data-id="${escape(book.id)}">${ico('edit')} Ubah Data</button></div></div></div>`;
+    const volumeControl=book.total_volumes>1&&book.total_volumes<=50?
+      `<select id="manual-volume" aria-label="Nomor juz atau jilid">${Array.from({length:book.total_volumes},(_,i)=>i+1).map(n=>`<option value="${n}" ${n===book.current_volume?'selected':''}>Jilid ${n}</option>`).join('')}</select>`:
+      `<input type="number" id="manual-volume" min="1" max="${book.total_volumes}" step="1" value="${book.current_volume}" aria-label="Nomor juz atau jilid">`;
+    const khatamTracker=`<section class="detail-khatam" aria-label="Tracker khatam bacaan">
+      <div class="khatam-info"><div class="khatam-eyebrow">JEJAK KHATAM</div><strong class="khatam-number">${book.khatam_count} <span>kali khatam</span></strong><small>${book.last_khatam_at?'Terakhir '+new Date(book.last_khatam_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}):'Belum ada khatam yang dicatat'}</small></div>
+      <button type="button" class="btn btn-khatam" data-action="khatam-add" data-id="${escape(book.id)}">${ico('check')} +1 Khatam</button>
+      <p>Tekan setelah menuntaskan satu kitab. Catatan khatam tidak menghapus progres halaman atau jilid yang sudah tersimpan.</p>
+    </section>`;
+    $('#dialog-root').innerHTML=`<div class="modal-shade" data-dismiss="true"><div class="modal" role="dialog" aria-modal="true" aria-label="Detail ${escape(book.title)}"><div class="modal-top"><div class="eyebrow">DETAIL BACAAN</div><button type="button" class="icon-btn" data-action="close" aria-label="Tutup">${ico('x')}</button></div><div class="detail-layout">${coverMarkup(book)}<div><div class="detail-topline">${escape(book.kind==='buku'?'BUKU BACAAN':'KITAB · FANN '+book.fann)}</div><h2 class="detail-name"${/[\u0600-\u06FF]/.test(book.title)?' lang="ar" dir="rtl"':''}>${escape(book.title)}</h2><div class="detail-author">${escape(book.author||'Pengarang belum dicatat')}</div><div class="detail-chips"><span class="detail-chip">${escape(book.status==='belum'?'Belum dibaca':book.status==='sedang'?'Sedang dibaca':'Selesai')}</span><span class="detail-chip">${book.total_pages?'Total '+book.total_pages+' halaman':'Halaman belum diketahui'}</span>${book.total_volumes>1?`<span class="detail-chip">Juz/Jilid ${book.current_volume} dari ${book.total_volumes}</span>`:''}</div>${progressMarkup(book)}${book.notes?`<p class="detail-note">${escape(book.notes)}</p>`:''}<div class="detail-actions">${links.join('')}</div><p class="field-hint">PDF tidak diunggah ke situs. Progres otomatis berlaku hanya jika PDF berhasil dirender di sini; pembukaan tautan eksternal tidak dapat dilacak.</p></div></div>
+    <div class="detail-progress"><h4>Tandai juz / jilid dan halaman terakhir</h4><div class="progress-inline volume-progress-inline"><label for="manual-volume">Juz / Jilid</label>${volumeControl}<span>dari ${book.total_volumes}</span><label for="manual-page">Halaman</label><input type="number" id="manual-page" min="0" max="${book.total_pages||100000}" value="${book.current_page}" aria-label="Halaman terakhir dibaca"><span id="manual-page-hint">${book.total_pages?'dari '+book.total_pages+' halaman':'belum ada total halaman'}</span><button type="button" class="btn btn-secondary" data-action="save-progress" data-id="${escape(book.id)}">${ico('check')} Simpan Progres</button></div><small class="field-hint">Pindah Juz / Jilid untuk melihat atau mencatat halaman terakhir pada jilid tersebut.</small></div>
+    ${khatamTracker}${coverTools}<div class="modal-actions"><button type="button" class="btn btn-danger" data-action="delete" data-id="${escape(book.id)}">${ico('trash')} Hapus dari Katalog</button><button type="button" class="btn btn-secondary" data-action="edit" data-id="${escape(book.id)}">${ico('edit')} Ubah Data</button></div></div></div>`;
   }
   function saveChosenCover(book, cover, pages=0) {
     if(!window.MAKTABAH_COVERS) throw new Error('Modul cover belum termuat.');
@@ -436,17 +470,19 @@
     const title=String(b.title||'').slice(0,260).trim();if(!title)throw new Error('Judul kosong dalam cadangan.');
     const total=Math.max(0,Math.min(100000,Math.floor(Number(b.total_pages)||0)));
     const page=Math.max(0,Math.min(total||100000,Math.floor(Number(b.current_page)||0)));
-    return window.MAKTABAH_VOLUMES.normalize({
+    return window.MAKTABAH_KHATAM.normalize(window.MAKTABAH_VOLUMES.normalize({
       id:typeof b.id==='string' && /^[A-Za-z0-9_-]{3,120}$/.test(b.id) ? b.id : 'impor-'+index+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now()),
       title,author:String(b.author||'').slice(0,200),kind:b.kind==='buku'?'buku':'kitab',
       fann:String(b.fann||'Belum Diklasifikasikan').slice(0,100),
       pdf_url:url(b.pdf_url)||'',cover_url:window.MAKTABAH_COVERS?.safeCover(b.cover_url)||url(b.cover_url)||'',notes:String(b.notes||'').slice(0,4000),
       total_pages:total,current_page:page,total_volumes:b.total_volumes,current_volume:b.current_volume,volume_progress:b.volume_progress,
+      khatam_count:b.khatam_count,khatam_base:b.khatam_base,khatam_events:b.khatam_events,
+      khatam_reset_at:b.khatam_reset_at,last_khatam_at:b.last_khatam_at,
       status:['belum','sedang','selesai'].includes(b.status)?b.status:(page?'sedang':'belum'),
       last_read_at:typeof b.last_read_at==='string'?b.last_read_at:null,
       created_at:typeof b.created_at==='string'?b.created_at:new Date().toISOString(),
       updated_at:new Date().toISOString(),drive_file_id:null
-    });
+    }));
   }
   async function importBackup(file){
     if(!file)return;
@@ -501,8 +537,8 @@
           getBooks:()=>state.books,
           getDeleted:readDeletions,
           applyMerged:(books,deleted)=>{
-            state.books=books;
-            storage.set(BOOKS_KEY,JSON.stringify(books));
+            state.books=books.map(b=>window.MAKTABAH_KHATAM.normalize(window.MAKTABAH_VOLUMES.normalize(b)));
+            storage.set(BOOKS_KEY,JSON.stringify(state.books));
             saveDeletions(deleted);
             renderBody();
           },
@@ -563,6 +599,22 @@
       if(!window.confirm(`Hapus "${b.title}" dari katalog? File PDF asli tidak akan dihapus.`))return;
       try {await api(`/api/books/${encodeURIComponent(b.id)}`,'DELETE');clearDialog();await reloadBooks();toast('Catatan dihapus dari katalog. PDF asli tetap aman.');}catch(e){toast(e.message);}return;
     }
+    if(a==='open-maraji'){
+      state.view='explore';state.query='';state.category=MARAJI;state.kind='Semua';
+      document.body.classList.remove('sidebar-open');renderBody();window.scrollTo({top:0,behavior:'instant'});return;
+    }
+    if(a==='khatam-add'&&b){
+      const current=window.MAKTABAH_KHATAM.normalize(b);
+      if(!window.confirm(`Catat satu kali khatam untuk "${current.title}"? Saat ini ${current.khatam_count} kali.`))return;
+      const before=state.books;
+      try{
+        const updated=window.MAKTABAH_KHATAM.add(current);
+        state.books=state.books.map(x=>x.id===b.id?updated:x);
+        if(!mockSave())throw new Error('Penyimpanan browser penuh; catatan khatam belum tersimpan.');
+        detail(updated);renderBody();toast(`Alhamdulillah, sudah ${updated.khatam_count} kali khatam.`);
+      }catch(err){state.books=before;storage.set(BOOKS_KEY,JSON.stringify(before));toast(err.message);}
+      return;
+    }
     if(a==='save-progress'&&b){
       const volume=Number($('#manual-volume')?.value);
       const page=Number($('#manual-page')?.value);
@@ -616,20 +668,25 @@
       const page=$('#book-page');
       if(page)page.max=String(Number(event.target.value)||100000);
     }
-    if(event.target.id==='manual-volume'){
-      const id=state.dialog?.id;
-      const book=state.books.find(b=>b.id===id);
-      if(!book)return;
-      const n=window.MAKTABAH_VOLUMES.normalize(book);
-      const volume=Number(event.target.value);
-      if(!Number.isInteger(volume)||volume<1||volume>n.total_volumes){event.target.value=String(n.current_volume);return;}
-      const current=n.volume_progress[volume]||{page:0,total_pages:0};
-      $('#manual-page').value=String(current.page||0);
-      $('#manual-page').max=String(current.total_pages||100000);
-      $('#manual-page-hint').textContent=current.total_pages?'dari '+current.total_pages+' halaman':'belum ada total halaman';
-    }
+    if(event.target.id==='manual-volume')refreshManualVolumePreview(event.target);
   });
+  function refreshManualVolumePreview(control){
+    const id=state.dialog?.id;
+    const book=state.books.find(b=>b.id===id);
+    if(!book)return;
+    const n=window.MAKTABAH_VOLUMES.normalize(book);
+    const volume=Number(control.value);
+    if(!Number.isInteger(volume)||volume<1||volume>n.total_volumes)return;
+    const current=n.volume_progress[String(volume)]||{page:0,total_pages:0};
+    const page=$('#manual-page'),hint=$('#manual-page-hint');
+    if(page){page.value=String(current.page||0);page.max=String(current.total_pages||100000);}
+    if(hint)hint.textContent=current.total_pages?'dari '+current.total_pages+' halaman':'belum ada total halaman';
+  }
   document.addEventListener('input',event=>{
+    // Number inputs emit input before blur; update the page field immediately.
+    if(event.target.id==='manual-volume' && event.target.type==='number'){
+      refreshManualVolumePreview(event.target);return;
+    }
     if(event.target.id==='search-input'){
       const cursor=event.target.selectionStart;
       state.query=event.target.value;renderBody();
@@ -659,7 +716,13 @@
     });
     if(!data.title){toast('Judul bacaan wajib diisi.');return;}
     if((data.pdf_url&&!url(data.pdf_url))||(data.cover_url&&!url(data.cover_url))){toast('Tautan harus dimulai dengan https:// atau http://');return;}
+    const requestedKhatam=Number(fd.get('khatam_count'));
+    if(!Number.isInteger(requestedKhatam)||requestedKhatam<0||requestedKhatam>9999){toast('Jumlah khatam harus bilangan bulat 0 sampai 9.999.');return;}
     const editing=state.dialog?.id;
+    const oldBook=editing?state.books.find(b=>b.id===editing):null;
+    const khatamData=window.MAKTABAH_KHATAM.setCount(oldBook||{},requestedKhatam);
+    Object.assign(data,{khatam_base:khatamData.khatam_base,khatam_events:khatamData.khatam_events,
+      khatam_reset_at:khatamData.khatam_reset_at,khatam_count:khatamData.khatam_count,last_khatam_at:khatamData.last_khatam_at});
     if(editing){
       data.status=String(fd.get('status')||'belum');
       const previous=state.books.find(b=>b.id===editing);

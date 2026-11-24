@@ -36,6 +36,9 @@
   }
   function coverSrc(book) {
     const own = safeCover(book?.cover_url);
+    // The personal Maraji' shelf deliberately has no automatic Drive thumbnails.
+    // The owner selects the cover locally for each reference.
+    if (book?.fann === "Maraji' Fiqh Travelling") return own || '';
     return own || bestEffortThumbnail(book?.pdf_url);
   }
   function ensurePdfJs() {
