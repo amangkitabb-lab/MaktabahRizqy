@@ -1,4 +1,4 @@
-/* Maktabahrizqy GitHub Pages v0.4 — browser-local catalogue, no account, no server. */
+/* Maktabahrizqy GitHub Pages v0.5 — local-first collection with optional Google sync. */
 (() => {
   'use strict';
   const PREVIEW = true; // Reuse local-data operations; there is no backend in Pages edition.
@@ -48,6 +48,19 @@
   const demoBooks = Array.isArray(window.MAKTABAH_SEED_BOOKS) ? window.MAKTABAH_SEED_BOOKS : [];
   const SEED_FLAG = 'maktabahrizqy_seed_v04';
   const BOOKS_KEY = 'maktabahrizqy_browser_books_v1';
+  const DELETED_KEY = 'maktabahrizqy_browser_deleted_v1';
+  const readDeletions = () => {
+    try {
+      const value = JSON.parse(storage.get(DELETED_KEY) || '{}');
+      return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    } catch (_) { return {}; }
+  };
+  const saveDeletions = data => storage.set(DELETED_KEY, JSON.stringify(data));
+  const recordDeleted = id => {
+    const current = readDeletions();
+    current[id] = new Date().toISOString();
+    saveDeletions(current);
+  };
   const state = {
     preview: false,
     theme: storage.get('maktabah_theme') === 'dark' ? 'dark' : 'light',
@@ -74,7 +87,10 @@
     }
     return saved;
   };
-  const mockSave = () => storage.set(BOOKS_KEY, JSON.stringify(state.books));
+  const mockSave = () => {
+    storage.set(BOOKS_KEY, JSON.stringify(state.books));
+    window.MAKTABAH_CLOUD?.notifyLocalChange();
+  };
   async function api(path, method='GET', data) {
     if (PREVIEW) {
       if (path === '/api/me') return {authenticated:true,configured:false,email:'',csrf:''};
@@ -96,7 +112,7 @@
           b.last_read_at=b.current_page?new Date().toISOString():null;
           b.updated_at=new Date().toISOString();
         }
-        if (method==='DELETE') state.books=state.books.filter(x=>x.id!==b.id);
+        if (method==='DELETE') { recordDeleted(b.id); state.books=state.books.filter(x=>x.id!==b.id); }
         mockSave();return {book:b,ok:true};
       }
       throw new Error('Fitur ini memerlukan sambungan aplikasi asli.');
@@ -168,7 +184,7 @@
     return `${pageHeader('Jelajahi <em>Bacaan</em>','Cari judul, pengarang, atau fann. Semua bacaanmu ada di satu tempat.','TEMUKAN LAGI')}
       <div class="toolbar"><div class="search-wrap">${ico('search')}<input type="search" class="input-search" id="search-input" placeholder="Cari judul, pengarang, atau fann..." autocomplete="off" value="${escape(state.query)}" aria-label="Cari bacaan"></div><div class="search-count">${filtered.length} dari ${state.books.length} bacaan</div></div>
       <div class="filter-row">${fannValues.map(f=>`<button type="button" class="filter-chip ${f===state.category?'active':''}" data-category="${escape(f)}">${escape(f)}</button>`).join('')}</div>
-      <div class="section-head"><div><h2>Seluruh katalog</h2><p>${filtered.length} judul ditemukan · tersimpan pada perangkat ini</p></div><div class="catalogue-actions"><button type="button" class="plain-link" data-action="import-drive-links">${ico('link')} Impor Tautan PDF</button><button type="button" class="plain-link" data-action="backup">${ico('download')} Ekspor Cadangan</button></div></div>
+      <div class="section-head"><div><h2>Seluruh katalog</h2><p>${filtered.length} judul ditemukan · tersimpan di rak bacaanmu</p></div><div class="catalogue-actions"><button type="button" class="plain-link" data-action="import-drive-links">${ico('link')} Impor Tautan PDF</button><button type="button" class="plain-link" data-action="backup">${ico('download')} Ekspor Cadangan</button></div></div>
       ${filtered.length?grid(filtered):emptyMarkup(state.books.length?'search':'list')}`;
   }
   function collectionMarkup() {
@@ -205,7 +221,23 @@
     btn.setAttribute('aria-label','Aktifkan '+label.toLowerCase());
     btn.title='Aktifkan '+label.toLowerCase();
   }
-  function renderLogin() { // GitHub Pages never uses login.
+  function renderCloudStatus(info) {
+    const message=$('#cloud-status');
+    if(message)message.textContent=info.message||'';
+    const login=$('#cloud-login-btn');
+    const sync=$('#cloud-sync-btn');
+    const logout=$('#cloud-logout-btn');
+    if(login) { login.hidden=info.connected; login.disabled=!!info.busy; }
+    if(sync) { sync.hidden=!info.connected; sync.disabled=!!info.busy; }
+    if(logout) logout.hidden=!info.connected;
+    const title=$('#cloud-account-title');
+    if(title)title.textContent=info.connected?'Rak Tersambung Google':'Rak Bacaan Lokal';
+    const user=$('#sidebar-user');
+    if(user)user.textContent=info.connected?('Google: '+info.email):'Tersimpan di browser ini';
+    const label=$('.privacy-label');
+    if(label)label.innerHTML='<span class="privacy-dot"></span> '+(info.connected?'DATA BROWSER + GOOGLE':'DATA DI BROWSER');
+  }
+  function renderLogin() { // Authentication is only used for optional cloud synchronization.
     toast('Login tidak digunakan pada versi GitHub Pages.');
   }
   function clearDialog(){state.dialog=null;$('#dialog-root').innerHTML='';}
@@ -328,7 +360,7 @@
     const total=Math.max(0,Math.min(100000,Math.floor(Number(b.total_pages)||0)));
     const page=Math.max(0,Math.min(total||100000,Math.floor(Number(b.current_page)||0)));
     return {
-      id:'impor-'+index+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now()),
+      id:typeof b.id==='string' && /^[A-Za-z0-9_-]{3,120}$/.test(b.id) ? b.id : 'impor-'+index+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now()),
       title,author:String(b.author||'').slice(0,200),kind:b.kind==='buku'?'buku':'kitab',
       fann:String(b.fann||'Belum Diklasifikasikan').slice(0,100),
       pdf_url:url(b.pdf_url)||'',cover_url:url(b.cover_url)||'',notes:String(b.notes||'').slice(0,4000),
@@ -346,7 +378,9 @@
       if(data?.format!=='maktabahrizqy-browser-backup'||data?.version!==1||!Array.isArray(data.books)||data.books.length>3000){throw new Error('Format cadangan tidak dikenali.');}
       const books=data.books.map(normalizedBackupBook);
       if(!window.confirm(`Ganti ${state.books.length} bacaan yang sekarang tersimpan di browser ini dengan ${books.length} bacaan dari cadangan? Jika belum dicadangkan, data lama akan hilang.`))return;
-      state.books=books;mockSave();clearDialog();renderBody();toast(`${books.length} bacaan berhasil dipulihkan di browser ini.`);
+      const incomingIds=new Set(books.map(book=>book.id));
+       for(const old of state.books)if(!incomingIds.has(old.id))recordDeleted(old.id);
+       state.books=books;mockSave();clearDialog();renderBody();toast(`${books.length} bacaan berhasil dipulihkan di browser ini.`);
     }catch(e){toast(e.message||'Cadangan tidak dapat dibaca.');}
   }
   async function importPrivateLinks(file) {
@@ -364,7 +398,7 @@
       }
       const matches=state.books.filter(b=>links.has(b.id));
       if(!matches.length){toast('Tidak ada judul yang cocok. Periksa apakah katalog awal sudah tersedia.');return;}
-      if(!window.confirm(`Tambahkan tautan PDF Drive untuk ${matches.length} judul di browser ini? Tautan tidak diunggah ke GitHub atau server.`))return;
+      if(!window.confirm(`Tambahkan tautan PDF Drive untuk ${matches.length} judul? Tautan tidak diunggah ke GitHub; jika login Google aktif, tautan ikut tersinkron secara privat di Drive aplikasimu.`))return;
       let changed=0;
       state.books=state.books.map(b=>{
         const link=links.get(b.id);
@@ -384,10 +418,27 @@
 
       $('#sidebar-user').textContent='Tersimpan di browser ini';
       await reloadBooks();
+      if(window.MAKTABAH_CLOUD) {
+        window.MAKTABAH_CLOUD.install({
+          getBooks:()=>state.books,
+          getDeleted:readDeletions,
+          applyMerged:(books,deleted)=>{
+            state.books=books;
+            storage.set(BOOKS_KEY,JSON.stringify(books));
+            saveDeletions(deleted);
+            renderBody();
+          },
+          onStatus:renderCloudStatus,
+          onError:toast,
+        });
+      }
     }catch(e){$('#content').innerHTML=`<div class="empty-state"><h3>Tidak dapat memuat perpustakaan</h3><p>${escape(e.message)}</p><button type="button" class="btn btn-secondary" data-action="retry">Coba lagi</button></div>`;}
   }
 
   document.addEventListener('click', async event=>{
+    if(event.target.closest('#cloud-login-btn')){window.MAKTABAH_CLOUD?.connect();return;}
+    if(event.target.closest('#cloud-sync-btn')){await window.MAKTABAH_CLOUD?.syncNow();return;}
+    if(event.target.closest('#cloud-logout-btn')){window.MAKTABAH_CLOUD?.disconnect();return;}
     const nav=event.target.closest('[data-nav]');if(nav){go(nav.dataset.nav);return;}
     if(event.target.closest('#theme-btn')){setTheme(state.theme==='dark'?'light':'dark');return;}
     if(event.target.closest('#menu-btn')){document.body.classList.toggle('sidebar-open');return;}

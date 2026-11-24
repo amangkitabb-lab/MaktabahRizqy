@@ -1,6 +1,6 @@
-# Maktabahrizqy - GitHub Pages v0.4
+# Maktabahrizqy - GitHub Pages v0.5
 
-Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi Bacaan**, dan **Koleksi Ku**. Berjalan sebagai situs statis di GitHub Pages tanpa Railway atau login.
+Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi Bacaan**, dan **Koleksi Ku**. Berjalan sebagai situs statis di GitHub Pages tanpa Railway. **Login Google bersifat opsional, khusus untuk menyinkronkan koleksi dan progres antarperangkat.**
 
 ## Katalog awal
 
@@ -9,9 +9,11 @@ Perpustakaan digital responsif dengan tiga menu tetap: **Web Utama**, **Jelajahi
 - Klasifikasi menurut fann bersifat sementara sampai metadata dan isi kitab diperiksa lebih lanjut. Beberapa entri berlabel "Belum Diklasifikasikan".
 - Ada berkas yang tampaknya merupakan beberapa edisi/volume dari judul yang sama; belum semuanya diperiksa untuk deduplikasi.
 
-## Penyimpanan lokal
+## Penyimpanan lokal dan Google
 
-- Progres membaca, tema, perubahan judul, serta tautan PDF yang ditambahkan sendiri disimpan di browser melalui localStorage.
+- Tanpa login, progres membaca, tema, perubahan judul, serta tautan PDF yang ditambahkan sendiri disimpan di browser melalui localStorage.
+- Dengan login Google (setelah konfigurasi OAuth), **metadata koleksi termasuk progres dan tautan pribadi** dapat tersinkron melalui Drive `appDataFolder` tersembunyi. Token login hanya berada di memori, bukan di repo atau localStorage. PDF sumber tidak diunggah ulang.
+- Login Google **tidak membatasi akses ke halaman katalog publik**. Fungsinya hanya sebagai otorisasi penyimpanan privat.
 - Rilis v0.4 menambahkan katalog awal sekali ke data lokal yang sudah ada, tanpa menghapus bacaan/progres yang telah tersimpan.
 - Jika suatu judul bawaan dihapus, judul tersebut tidak muncul kembali sesudah refresh pada browser yang sama.
 - Ekspor cadangan pribadi dalam JSON tersedia di sidebar dan Jelajahi Bacaan. File cadangan sebaiknya disimpan secara aman.
@@ -32,11 +34,12 @@ Dapatkan **Maktabahrizqy_Tautan_PDF_Pribadi.json** dari percakapan ChatGPT denga
 
 - GitHub Pages source: branch `main`, folder `/docs`.
 - Folder `/docs` memuat website. Berkas backend v0.2 disimpan sebagai arsip kompatibilitas dan tidak digunakan oleh GitHub Pages.
-- Website kode publik, **koleksi/progres yang diketik pengguna tetap lokal**, bukan profil server, sehingga tidak otomatis tersinkron antarperangkat.
-- Fitur autentikasi dan sinkronisasi server kelak memerlukan sistem tambahan, tidak bisa dipenuhi oleh GitHub Pages murni.
+- Situs tetap statis. Sinkronisasi menggunakan Google Drive API atas izin akun Google pengguna; **tidak ada backend atau Railway**.
+- Login tidak aktif sampai pengelola memasukkan OAuth Web Client ID di `docs/google-config.js` dan mengaktifkan Google Drive API.
+- Ikuti **[PANDUAN_LOGIN_GOOGLE.md](PANDUAN_LOGIN_GOOGLE.md)** untuk instruksi Google Cloud dan cara login dari HP/laptop. OAuth Client ID boleh publik; jangan pernah commit Client Secret.
 
 ## Keamanan
 
 - Jangan menyimpan password, Google OAuth secret, token, file identitas, atau private JSON di repo.
-- Folder Drive Amangrejeki saat audit memiliki akses `anyone` sebagai `reader`; tinjau izin folder dan dokumen pribadi secara terpisah.
+- Katalog judul publik tidak berisi tautan PDF Drive. Hak akses folder dan PDF Amangrejeki harus dikelola terpisah; aplikasi sinkronisasi **hanya menggunakan appDataFolder**, bukan mengubah izin arsip sumber.
 - Penambahan judul ke katalog tidak mengubah izin berbagi PDF Drive dan tidak memindahkan, menyalin, atau mengganti nama PDF sumber.
