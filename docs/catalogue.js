@@ -159,7 +159,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "IANAH FullSet--Dar Salam",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-03b598aa",
@@ -418,7 +421,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "FATHUL MUIN DarIbnHazm",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-2089822a",
@@ -460,28 +466,40 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "RAWA'I BAYAN J1",
     "kind": "kitab",
     "fann": "Tafsir",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-ff673746",
     "title": "RAWA'I BAYAN J2",
     "kind": "kitab",
     "fann": "Tafsir",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-5e410a07",
     "title": "GHOYATUL USUL Dar Dhiya'",
     "kind": "kitab",
     "fann": "Ushul Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-e31a1147",
     "title": "TARSIH MUSTAFIDIN Dar Ihya",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-dc652cca",
@@ -516,7 +534,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "TUHFATU TULLAB Dar Ilmiyyah",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-ae30d40e",
@@ -537,7 +558,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "MUGNI MUHTAJ J2 Dar Ma'rifah",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-3af3694e",
@@ -551,21 +575,30 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "MU'TAMAD J5",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-c0c033a8",
     "title": "MU'TAMAD J4",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-c7c03ead",
     "title": "MU'TAMAD J3",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-a4d48244",
@@ -579,7 +612,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "FATHUL QORIB Dar Ibn Hazm",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-0911658c",
@@ -621,7 +657,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "متن سفينة النجاء",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-effb9c16",
@@ -635,7 +674,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "الإبانة والإفاضة في أحكام الحيض والنفاس والاستحاضة",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-db574fc6",
@@ -740,7 +782,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "تشجير إيضاح القواعد الفقهية عبد الله اللحجي",
     "kind": "kitab",
     "fann": "Kaidah Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-78fcde6f",
@@ -754,7 +799,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "تهذيب الأشباه والنظائر في فروع الشافعية للسيوطي",
     "kind": "kitab",
     "fann": "Kaidah Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-c68acb24",
@@ -768,7 +816,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "عمدة السالك وعدة الناسك",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-f4e0c1fc",
@@ -803,14 +854,20 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "التقريرات السديدة - ج1 -",
     "kind": "kitab",
     "fann": "Fiqh",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-53ad7b3c",
     "title": "Thuruq Takhrij al-Hadith",
     "kind": "kitab",
     "fann": "Hadis",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mb-e215039f",
@@ -1251,14 +1308,20 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "Bajuri 2",
     "kind": "kitab",
     "fann": "Maraji' Fiqh Travelling",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mft-0d73bbe4",
     "title": "Majmu'",
     "kind": "kitab",
     "fann": "Maraji' Fiqh Travelling",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mft-28a281e2",
@@ -1300,7 +1363,10 @@ window.MAKTABAH_SEED_BOOKS = [
     "title": "Nihayat Almuhtaj02 236 - 280",
     "kind": "kitab",
     "fann": "Maraji' Fiqh Travelling",
-    "author": ""
+    "author": "",
+    "collections": [
+      "Maraji' Bahsul Masail"
+    ]
   },
   {
     "id": "mft-076a9652",
@@ -1313,420 +1379,472 @@ window.MAKTABAH_SEED_BOOKS = [
     "id": "mbm-minhaj",
     "title": "Minhajut Thalibin (منهاج الطالبين)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
-    "author": "Imam al-Nawawi"
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Imam al-Nawawi",
+    "pdf_url": "https://upload.wikimedia.org/wikisource/ar/2/2e/%D9%85%D9%86%D9%87%D8%A7%D8%AC_%D8%A7%D9%84%D8%B7%D8%A7%D9%84%D8%A8%D9%8A%D9%86.pdf"
   },
   {
     "id": "mbm-tuhfah",
     "title": "Tuhfatul Muhtaj (تحفة المحتاج في شرح المنهاج)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Ibnu Hajar al-Haitami"
   },
   {
     "id": "mbm-nihayah",
     "title": "Nihayatul Muhtaj (نهاية المحتاج إلى شرح المنهاج)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Syamsuddin al-Ramli"
   },
   {
     "id": "mbm-mughni",
     "title": "Mughnil Muhtaj (مغني المحتاج إلى معرفة معاني ألفاظ المنهاج)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Al-Khatib al-Syirbini"
   },
   {
     "id": "mbm-kanz",
     "title": "Kanzur Raghibin (كنز الراغبين شرح منهاج الطالبين)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
-    "author": "Jalaluddin al-Mahalli"
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Jalaluddin al-Mahalli",
+    "pdf_url": "https://figgy.princeton.edu/concern/scanned_resources/1a917869-e373-42f8-9718-29df8e8ab235/pdf"
   },
   {
     "id": "mbm-syarwani",
     "title": "Hasyiah al-Syarwani 'ala Tuhfatil Muhtaj (حاشية الشرواني)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Abdul Hamid al-Syarwani"
   },
   {
     "id": "mbm-abbadi",
     "title": "Hasyiah Ibnu Qasim al-'Abbadi 'ala Tuhfatil Muhtaj (حاشية ابن قاسم العبادي)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Ibnu Qasim al-'Abbadi"
   },
   {
     "id": "mbm-umdah",
     "title": "Umdatus Salik wa 'Uddatun Nasik (عمدة السالك وعدة الناسك)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Ibnu al-Naqib"
   },
   {
     "id": "mbm-anwar",
     "title": "Anwarul Masalik (أنوار المسالك شرح عمدة السالك)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad al-Zuhri al-Ghamrawi"
   },
   {
     "id": "mbm-taqrib",
     "title": "Matn al-Ghayah wa al-Taqrib (متن الغاية والتقريب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Abu Syuja' al-Ashfahani"
   },
   {
     "id": "mbm-qarib",
     "title": "Fathul Qarib al-Mujib (فتح القريب المجيب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Ibnu Qasim al-Ghazzi"
   },
   {
     "id": "mbm-bajuri",
     "title": "Hasyiah al-Bajuri 'ala Fathil Qarib (حاشية الباجوري)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Ibrahim al-Bajuri"
   },
   {
     "id": "mbm-tausikh",
     "title": "Al-Tausyih 'ala Ibni Qasim (التوشيح على ابن قاسم)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad Nawawi al-Bantani"
   },
   {
     "id": "mbm-iqna",
     "title": "Al-Iqna' fi Halli Alfazhi Abi Syuja' (الإقناع في حل ألفاظ أبي شجاع)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Al-Khatib al-Syirbini"
   },
   {
     "id": "mbm-bujairimi-khatib",
     "title": "Hasyiah al-Bujairimi 'ala al-Khatib (تحفة الحبيب على شرح الخطيب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Sulaiman al-Bujairimi"
   },
   {
     "id": "mbm-bujairimi-manhaj",
     "title": "Hasyiah al-Bujairimi 'ala Syarhil Manhaj (التجريد لنفع العبيد)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Sulaiman al-Bujairimi"
   },
   {
     "id": "mbm-muin",
     "title": "Fathul Mu'in (فتح المعين بشرح قرة العين)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Zainuddin al-Malibari"
   },
   {
     "id": "mbm-ianah",
     "title": "I'anatut Thalibin (إعانة الطالبين)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Abu Bakr Syatha al-Dimyathi"
   },
   {
     "id": "mbm-tarsyih",
     "title": "Tarsyihul Mustafidin (ترشيح المستفيدين)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Alawi bin Ahmad al-Saqqaf"
   },
   {
     "id": "mbm-muqaddimah",
     "title": "Al-Muqaddimah al-Hadhramiyyah / Ba Fadhl (المقدمة الحضرمية)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Abdullah bin Abdurrahman Ba Fadhl"
   },
   {
     "id": "mbm-qawim",
     "title": "Al-Manhajul Qawim (المنهج القويم شرح المقدمة الحضرمية)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Ibnu Hajar al-Haitami"
   },
   {
     "id": "mbm-tarmasi",
     "title": "Hasyiah al-Tarmasi / Mauhibat Dzi al-Fadhl (موهبة ذي الفضل)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad Mahfuzh al-Tarmasi"
   },
   {
     "id": "mbm-busyra",
     "title": "Busyral Karim (بشرى الكريم شرح مسائل التعليم)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Sa'id bin Muhammad Ba'asyin"
   },
   {
     "id": "mbm-safinah",
     "title": "Safinatun Najah (سفينة النجاة)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Salim bin Sumair al-Hadhrami"
   },
   {
     "id": "mbm-kasyifah",
     "title": "Kasyifatus Saja (كاشفة السجا شرح سفينة النجا)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad Nawawi al-Bantani"
   },
   {
     "id": "mbm-ghayah-muna",
     "title": "Ghayatul Muna (غاية المنى شرح سفينة النجا)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad bin Ali Ba'athiyyah"
   },
   {
     "id": "mbm-zain",
     "title": "Nihayatuz Zain (نهاية الزين في إرشاد المبتدئين)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad Nawawi al-Bantani"
   },
   {
     "id": "mbm-majmu",
     "title": "Al-Majmu' Syarhul Muhadzdzab (المجموع شرح المهذب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Imam al-Nawawi"
   },
   {
     "id": "mbm-raudhah",
     "title": "Raudhatut Thalibin (روضة الطالبين)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Imam al-Nawawi"
   },
   {
     "id": "mbm-fatawa-nawawi",
     "title": "Fatawa al-Nawawi / al-Masa'il al-Mantsurah (المسائل المنثورة)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Imam al-Nawawi; dihimpun Ibnu al-'Aththar"
   },
   {
     "id": "mbm-fatawa-hadits",
     "title": "Al-Fatawa al-Haditsiyyah (الفتاوى الحديثية)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Ibnu Hajar al-Haitami"
   },
   {
     "id": "mbm-aziz",
     "title": "Al-'Aziz Syarhul Wajiz / Fathul 'Aziz (العزيز شرح الوجيز)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Abdul Karim al-Rafi'i"
   },
   {
     "id": "mbm-muharrar",
     "title": "Al-Muharrar (المحرر)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Abdul Karim al-Rafi'i"
   },
   {
     "id": "mbm-nihayat-matlab",
     "title": "Nihayatul Mathlab fi Dirayatil Madzhab (نهاية المطلب في دراية المذهب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Imam al-Haramain al-Juwaini"
   },
   {
     "id": "mbm-wasit",
     "title": "Al-Wasith fil Madzhab (الوسيط في المذهب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Imam al-Ghazali"
   },
   {
     "id": "mbm-wajiz",
     "title": "Al-Wajiz fi Fiqhil Imam al-Syafi'i (الوجيز في فقه الإمام الشافعي)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Imam al-Ghazali"
   },
   {
     "id": "mbm-ihya",
     "title": "Ihya' Ulumiddin (إحياء علوم الدين)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Imam al-Ghazali"
   },
   {
     "id": "mbm-manhaj-tullab",
     "title": "Manhajut Thullab (منهج الطلاب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
-    "author": "Zakaria al-Anshari"
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Zakaria al-Anshari",
+    "pdf_url": "https://figgy.princeton.edu/concern/scanned_resources/9e084989-972a-4e1f-9336-003ee3cf57c1/pdf"
   },
   {
     "id": "mbm-wahhab",
     "title": "Fathul Wahhab bi Syarhi Manhajit Thullab (فتح الوهاب بشرح منهج الطلاب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Zakaria al-Anshari"
   },
   {
     "id": "mbm-asna",
     "title": "Asnal Mathalib (أسنى المطالب في شرح روض الطالب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Zakaria al-Anshari"
   },
   {
     "id": "mbm-tuhfat-tullab",
     "title": "Tuhfatut Thullab bi Syarhi Tahriri Tanqihil Lubab (تحفة الطلاب)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Zakaria al-Anshari"
   },
   {
     "id": "mbm-jam",
     "title": "Jam'ul Jawami' (جمع الجوامع)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Tajuddin Abdul Wahhab al-Subki"
   },
   {
     "id": "mbm-mahalli-jam",
     "title": "Syarah al-Mahalli 'ala Jam'il Jawami' (شرح المحلي على جمع الجوامع)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Jalaluddin al-Mahalli"
   },
   {
     "id": "mbm-lubb",
     "title": "Lubb al-Ushul (لب الأصول)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Zakaria al-Anshari"
   },
   {
     "id": "mbm-ghayah-usul",
     "title": "Ghayatul Wushul Syarh Lubbil Ushul (غاية الوصول شرح لب الأصول)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Zakaria al-Anshari"
   },
   {
     "id": "mbm-ibhaj",
     "title": "Al-Ibhaj fi Syarhil Minhaj (الإبهاج في شرح المنهاج)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Taqiyuddin dan Tajuddin al-Subki"
   },
   {
     "id": "mbm-fatawa-subki",
     "title": "Fatawa al-Subki (فتاوى السبكي)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Taqiyuddin al-Subki"
   },
   {
     "id": "mbm-waraqat",
     "title": "Al-Waraqat (الورقات)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Imam al-Haramain al-Juwaini"
   },
   {
     "id": "mbm-syarah-waraqat",
     "title": "Syarah al-Waraqat (شرح الورقات)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Jalaluddin al-Mahalli"
   },
   {
     "id": "mbm-qawaid-asas",
     "title": "Al-Qawa'id al-Asasiyyah fi Ushulil Fiqh (القواعد الأساسية في أصول الفقه)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad bin Alawi al-Maliki"
   },
   {
     "id": "mbm-ahkam-sulthani",
     "title": "Al-Ahkam al-Sulthaniyyah (الأحكام السلطانية)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Abu al-Hasan al-Mawardi"
   },
   {
     "id": "mbm-haid",
     "title": "Al-Ibanah wal Ifadhah fi Ahkamil Haidh wan Nifas wal Istihadhah (الإبانة والإفاضة في أحكام الحيض والنفاس والاستحاضة)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": ""
   },
   {
     "id": "mbm-mu'tamad",
     "title": "Al-Mu'tamad fil Fiqh al-Syafi'i (المعتمد في الفقه الشافعي)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad al-Zuhaili"
   },
   {
     "id": "mbm-fiqh-islami",
     "title": "Al-Fiqh al-Islami wa Adillatuhu (الفقه الإسلامي وأدلته)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Wahbah al-Zuhaili"
   },
   {
     "id": "mbm-mausuah",
     "title": "Al-Mausu'ah al-Fiqhiyyah al-Kuwaitiyyah (الموسوعة الفقهية الكويتية)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Kementerian Wakaf dan Urusan Islam Kuwait"
   },
   {
     "id": "mbm-manhaji",
     "title": "Al-Fiqh al-Manhaji 'ala Madzhabil Imam al-Syafi'i (الفقه المنهجي على مذهب الإمام الشافعي)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Mustafa al-Khin, Mustafa Dib al-Bugha, Ali al-Syarbaji"
   },
   {
     "id": "mbm-dawabit",
     "title": "Dhawabith al-Mashlahah fi al-Syari'ah al-Islamiyyah (ضوابط المصلحة في الشريعة الإسلامية)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad Sa'id Ramadhan al-Buthi"
-  },
-  {
-    "id": "mbm-fikroh",
-    "title": "Al-Fikroh (kumpulan ibarah; judul/edisi perlu verifikasi)",
-    "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
-    "author": ""
   },
   {
     "id": "mbm-radd",
     "title": "Raddul Muhtar 'ala al-Durril Mukhtar / Hasyiah Ibnu Abidin (رد المحتار على الدر المختار)",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
+    "fann": "Maraji' Bahsul Masail",
     "author": "Muhammad Amin Ibnu Abidin — Hanafi"
   },
   {
-    "id": "mbm-mughni-qudamah",
-    "title": "Al-Mughni (المغني)",
+    "id": "mbm-qalyubi-umayra",
+    "title": "Hasyiyata Qalyubi wa 'Umayra 'ala Kanz al-Raghibin",
     "kind": "kitab",
-    "fann": "Maraji' Bahtsul Masail",
-    "author": "Ibnu Qudamah — Hanbali / fiqh perbandingan"
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Syihabuddin al-Qalyubi dan Syihabuddin 'Umayra"
+  },
+  {
+    "id": "mbm-almuhadzdzab",
+    "title": "Al-Muhadzdzab fi Fiqh al-Imam al-Syafi'i",
+    "kind": "kitab",
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Abu Ishaq al-Syirazi"
+  },
+  {
+    "id": "mbm-fatawa-fiqhiyya",
+    "title": "Al-Fatawa al-Fiqhiyyah al-Kubra",
+    "kind": "kitab",
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Ibnu Hajar al-Haitami"
+  },
+  {
+    "id": "mbm-ashbah-nazair",
+    "title": "Al-Asybah wan Nazha'ir fi Qawa'id Fiqh al-Syafi'iyyah",
+    "kind": "kitab",
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Jalaluddin al-Suyuthi"
+  },
+  {
+    "id": "mbm-mawsuah-qawaid",
+    "title": "Mausu'at al-Qawa'id al-Fiqhiyyah (موسوعة القواعد الفقهية)",
+    "kind": "kitab",
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Muhammad Shidqi al-Burnu"
+  },
+  {
+    "id": "mbm-tadzhib-bugha",
+    "title": "Al-Tadzhib fi Adillat Matn al-Ghayah wat Taqrib",
+    "kind": "kitab",
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Musthafa Dib al-Bugha"
+  },
+  {
+    "id": "mbm-ahkamul-fuqaha",
+    "title": "Ahkamul Fuqaha: Hasil Keputusan Bahtsul Masail NU",
+    "kind": "kitab",
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Lajnah Ta'lif wan Nasyr PBNU"
+  },
+  {
+    "id": "mbm-murajaat-sidogiri",
+    "title": "Muraja'atuth Thalabah (Kumpulan Hasil Bahtsul Masail Sidogiri)",
+    "kind": "kitab",
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Kuliah Syariah Pondok Pesantren Sidogiri"
+  },
+  {
+    "id": "mbm-muwafaqat",
+    "title": "Al-Muwafaqat fi Ushul al-Syari'ah",
+    "kind": "kitab",
+    "fann": "Maraji' Bahsul Masail",
+    "author": "Abu Ishaq al-Syathibi — Maliki"
   }
 ];
