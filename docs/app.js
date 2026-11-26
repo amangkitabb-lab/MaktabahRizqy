@@ -45,13 +45,21 @@
     get: key => {try {return window.localStorage.getItem(key) ?? memoryStore[key] ?? null} catch (_) {return memoryStore[key] ?? null}},
     set: (key,value) => {memoryStore[key] = value;try {window.localStorage.setItem(key,value);return true} catch (_) {return false}},
   };
-  const FANN = ["Maraji' Fiqh Travelling", "Maraji' Bahtsul Masail", 'Belum Diklasifikasikan', 'Fiqh', 'Aqidah', 'Mantiq', 'Nahwu', 'Sharaf', 'Ushul Fiqh', 'Kaidah Fiqh', 'Tafsir', 'Hadis', 'Tasawuf', 'Akhlak', 'Doa & Wirid', 'Faraidh', 'Tajwid', 'Balaghah', 'Sejarah', 'Bahasa Arab', 'Lainnya'];
+  const FANN = ["Maraji' Fiqh Travelling", "Maraji' Bahsul Masail", 'Belum Diklasifikasikan', 'Fiqh', 'Aqidah', 'Mantiq', 'Nahwu', 'Sharaf', 'Ushul Fiqh', 'Kaidah Fiqh', 'Tafsir', 'Hadis', 'Tasawuf', 'Akhlak', 'Doa & Wirid', 'Faraidh', 'Tajwid', 'Balaghah', 'Sejarah', 'Bahasa Arab', 'Lainnya'];
   const demoBooks = Array.isArray(window.MAKTABAH_SEED_BOOKS) ? window.MAKTABAH_SEED_BOOKS : [];
   const SEED_FLAG = 'maktabahrizqy_seed_v04';
   const MARAJI = "Maraji' Fiqh Travelling";
   const MARAJI_SEED_FLAG = 'maktabahrizqy_maraji_v08';
-  const MARAJI_BM = "Maraji' Bahtsul Masail";
-  const MARAJI_BM_SEED_FLAG = 'maktabahrizqy_maraji_bm_v01';
+  const MARAJI_BM = "Maraji' Bahsul Masail";
+  const MARAJI_BM_LEGACY = "Maraji' Bahtsul Masail";
+  const MARAJI_BM_SEED_FLAG = 'maktabahrizqy_maraji_bm_v02';
+  const seedById = new Map(demoBooks.map(book=>[book.id,book]));
+  const bahsulIDs = new Set(demoBooks.filter(book=>book.fann===MARAJI_BM||book.collections?.includes(MARAJI_BM)).map(book=>book.id));
+  const isBahsul = book => !!book && (bahsulIDs.has(book.id)||book.fann===MARAJI_BM||book.fann===MARAJI_BM_LEGACY||book.collections?.includes(MARAJI_BM));
+  const bahsulRank = book => {
+    const seed=seedById.get(book.id);
+    return seed?.fann===MARAJI_BM ? 1+demoBooks.indexOf(seed) : 100000+Math.max(0,demoBooks.findIndex(x=>x.id===book.id));
+  };
   const BOOKS_KEY = 'maktabahrizqy_browser_books_v1';
   const DELETED_KEY = 'maktabahrizqy_browser_deleted_v1';
   const readDeletions = () => {
@@ -115,10 +123,18 @@
       const deleted=readDeletions();
       const titleKey=value=>String(value||'').trim().toLocaleLowerCase('id-ID').replace(/\s+/g,' ');
       for(const seed of demoBooks.filter(x=>x.fann===MARAJI_BM)){
-        if(deleted[seed.id] || saved.some(b=>b.id===seed.id ||
-          (b.fann===MARAJI_BM && titleKey(b.title)===titleKey(seed.title)))) continue;
-        saved.push({...seed,author:seed.author||'',pdf_url:'',cover_url:'',notes:'',
-          total_pages:0,current_page:0,status:'belum',last_read_at:null,
+        if(deleted[seed.id])continue;
+        const existing=saved.find(b=>b.id===seed.id ||
+          ((b.fann===MARAJI_BM||b.fann===MARAJI_BM_LEGACY)&&titleKey(b.title)===titleKey(seed.title)));
+        if(existing){
+          if(existing.id===seed.id && !existing.pdf_url && /^https:\/\//.test(seed.pdf_url||'')){
+            existing.pdf_url=seed.pdf_url;
+            existing.updated_at=now;
+          }
+          continue;
+        }
+        saved.push({...seed,author:seed.author||'',pdf_url:/^https:\/\//.test(seed.pdf_url||'')?seed.pdf_url:'',
+          cover_url:'',notes:'',total_pages:0,current_page:0,status:'belum',last_read_at:null,
           created_at:now,updated_at:now,drive_file_id:null});
       }
       if(storage.set(BOOKS_KEY,JSON.stringify(saved)))storage.set(MARAJI_BM_SEED_FLAG,'1');
@@ -222,7 +238,7 @@
     const pages=list.reduce((sum,b)=>sum+Object.values(window.MAKTABAH_VOLUMES.entriesOf(b)).reduce((v,p)=>v+(Number(p.page)||0),0),0);
     const khatamTotal=list.reduce((sum,b)=>sum+window.MAKTABAH_KHATAM.normalize(b).khatam_count,0);
     const maraji=list.filter(b=>b.fann===MARAJI);
-    const marajiBM=list.filter(b=>b.fann===MARAJI_BM);
+    const marajiBM=list.filter(isBahsul).sort((a,b)=>bahsulRank(a)-bahsulRank(b));
     const recent=[...list].sort((a,b)=>(b.updated_at||'').localeCompare(a.updated_at||'')).slice(0,10);
     const readRecently=[...underway].sort((a,b)=>(b.last_read_at||'').localeCompare(a.last_read_at||''));
     const current=readRecently[0];
@@ -232,7 +248,7 @@
     html+=shelfMarkup('shelf-recent',recent,'Baru ditambahkan','Judul yang terakhir kamu masukkan atau perbarui.',{view:'collection'});
     if(current)html+=`<section class="section"><div class="section-head"><div><h2>Lanjutkan membaca</h2><p>Sambung dari halaman dan jilid terakhir yang tersimpan.</p></div></div><div class="continue-panel">${coverMarkup(current)}<div class="continue-copy"><div class="eyebrow">BACAAN TERAKHIR</div><h3>${escape(current.title)}</h3><p>${escape(current.author||current.fann)}</p>${progressMarkup(current)}</div><button type="button" class="btn btn-primary" data-open="${escape(current.id)}">Lanjutkan ${ico('arrow-right')}</button></div></section>`;
     html+=shelfMarkup('shelf-maraji',maraji,"Maraji' Fiqh Travelling",`${maraji.length} rujukan fiqh safar dalam rak khusus.`,{category:MARAJI});
-    html+=shelfMarkup('shelf-maraji-bm',marajiBM,MARAJI_BM,`${marajiBM.length} rujukan bahtsul masail dalam rak khusus.`,{category:MARAJI_BM});
+    html+=shelfMarkup('shelf-maraji-bm',marajiBM.slice(0,12),MARAJI_BM,`${marajiBM.length} rujukan bahsul masail dalam satu koleksi.`,{category:MARAJI_BM});
     html+=shelfMarkup('shelf-missed',overlooked.length?overlooked:list.filter(b=>!recentIds.has(b.id)).slice(0,10),'Buku yang mungkin terlewat','Temukan bacaan lama yang bisa kamu mulai lagi.',{view:'explore'});
     html+=`<section class="section library-summary"><div class="section-head"><div><h2>Jejak bacamu</h2><p>Progres dan khatam yang kamu catat sendiri.</p></div></div>
       <div class="stats">${stat('Total Koleksi',list.length,'Kitab & buku tercatat','layers')}${stat('Sedang Dibaca',underway.length,'Bacaan yang berjalan','book')}${stat('Selesai Dibaca',finished.length,'Bacaan tuntas','check')}${stat('Halaman Terbaca',pages.toLocaleString('id-ID'),'Terakumulasi di koleksi','clock')}${stat('Total Khatam',khatamTotal.toLocaleString('id-ID'),'Khatam seluruh kitab','check')}</div>
@@ -241,11 +257,11 @@
     return html;
   }
   function exploreMarkup() {
-    const fannValues=['Semua',...new Set(state.books.map(b=>b.kind==='buku'?'Buku Bacaan':b.fann))];
+    const fannValues=['Semua',MARAJI_BM,...new Set(state.books.map(b=>b.kind==='buku'?'Buku Bacaan':b.fann).filter(x=>x!==MARAJI_BM&&x!==MARAJI_BM_LEGACY))];
     const q=state.query.trim().toLocaleLowerCase('id-ID');
     const filtered=state.books.filter(b=> {
       const inText = `${b.title} ${b.author} ${b.fann} ${b.kind==='buku'?'Buku Bacaan':'Kitab'} ${b.notes||''}`.toLocaleLowerCase('id-ID').includes(q);
-      const inCategory=state.category==='Semua'||(state.category==='Buku Bacaan'?b.kind==='buku':b.kind==='kitab'&&b.fann===state.category);
+      const inCategory=state.category==='Semua'||(state.category===MARAJI_BM?isBahsul(b):(state.category==='Buku Bacaan'?b.kind==='buku':b.kind==='kitab'&&b.fann===state.category));
       return inText && inCategory;
     });
     return `${pageHeader('Jelajahi <em>Bacaan</em>','Cari judul, pengarang, atau fann. Semua bacaanmu ada di satu tempat.','TEMUKAN LAGI')}
@@ -257,8 +273,15 @@
   function collectionMarkup() {
     const visible=state.books.filter(b=>state.kind==='Semua'||(state.kind==='Kitab'?b.kind==='kitab':b.kind==='buku'));
     const groups={};
-    visible.forEach(b=>{const key=b.kind==='buku'?'Buku Bacaan':(b.fann===MARAJI||b.fann===MARAJI_BM)?b.fann:`Kitab · Fann ${b.fann}`;(groups[key]||=[]).push(b);});
-    const order=Object.keys(groups).sort((a,b)=>a===b?0:a===MARAJI?-1:b===MARAJI?1:a===MARAJI_BM?-1:b===MARAJI_BM?1:a==='Buku Bacaan'?1:b==='Buku Bacaan'?-1:a.localeCompare(b,'id'));
+    visible.forEach(b=>{
+      if(isBahsul(b))(groups[MARAJI_BM]||=[]).push(b);
+      const key=b.kind==='buku'?'Buku Bacaan':
+        (b.fann===MARAJI_BM||b.fann===MARAJI_BM_LEGACY)?null:
+        b.fann===MARAJI?MARAJI:`Kitab · Fann ${b.fann}`;
+      if(key)(groups[key]||=[]).push(b);
+    });
+    if(groups[MARAJI_BM])groups[MARAJI_BM].sort((a,b)=>bahsulRank(a)-bahsulRank(b));
+    const order=Object.keys(groups).sort((a,b)=>a===b?0:a===MARAJI_BM?-1:b===MARAJI_BM?1:a===MARAJI?-1:b===MARAJI?1:a==='Buku Bacaan'?1:b==='Buku Bacaan'?-1:a.localeCompare(b,'id'));
     return `${pageHeader('Koleksi <em>Ku</em>','Rak pribadi yang dibagi menurut buku bacaan dan disiplin keilmuan kitab.','RAK BACAANMU')}
     <div class="collection-intro"><div class="collection-banner"><div><h3>Kitab</h3><p>Fiqh, Aqidah, Mantiq, Nahwu, Sharaf, dan berbagai fann lainnya.</p></div><div class="banner-mark">الكتب</div></div><div class="collection-banner"><div><h3>Buku Bacaan</h3><p>Nonfiksi, sejarah, pengembangan diri, dan bacaan lainnya.</p></div><div class="banner-mark">01</div></div></div>
     <div class="filter-row">${['Semua','Kitab','Buku Bacaan'].map(f=>`<button type="button" class="filter-chip ${state.kind===f?'active':''}" data-kind="${f}">${f}</button>`).join('')}</div>
@@ -273,10 +296,12 @@
     const root=$('#sidebar-category-list');if(!root)return;
     const totals=new Map();
     state.books.forEach(book=>{
-      const category=book.kind==='buku'?'Buku Bacaan':String(book.fann||'Belum Diklasifikasikan');
+      let category=book.kind==='buku'?'Buku Bacaan':String(book.fann||'Belum Diklasifikasikan');
+      if(category===MARAJI_BM_LEGACY)category=MARAJI_BM;
       totals.set(category,(totals.get(category)||0)+1);
+      if(isBahsul(book)&&category!==MARAJI_BM)totals.set(MARAJI_BM,(totals.get(MARAJI_BM)||0)+1);
     });
-    const names=[...totals.keys()].sort((a,b)=>a===b?0:a===MARAJI?-1:b===MARAJI?1:a===MARAJI_BM?-1:b===MARAJI_BM?1:a.localeCompare(b,'id'));
+    const names=[...totals.keys()].sort((a,b)=>a===b?0:a===MARAJI_BM?-1:b===MARAJI_BM?1:a===MARAJI?-1:b===MARAJI?1:a.localeCompare(b,'id'));
     const count=$('#sidebar-category-count');if(count)count.textContent=String(names.length);
     const active=(key)=>state.view==='explore'&&state.category===key;
     root.innerHTML=`<button type="button" class="sidebar-category ${active('Semua')?'active':''}" data-side-category="Semua" ${active('Semua')?'aria-current="page"':''}><span>Semua koleksi</span><span class="genre-count">${state.books.length}</span></button>`
@@ -380,7 +405,7 @@
     toast('Login tidak digunakan pada versi GitHub Pages.');
   }
   function clearDialog(){state.dialog=null;$('#dialog-root').innerHTML='';}
-  const fannOptions=(current)=>FANN.map(f=>`<option value="${escape(f)}" ${f===current?'selected':''}>${escape(f)}</option>`).join('');
+  const fannOptions=(current)=>FANN.map(f=>`<option value="${escape(f)}" ${f===(current===MARAJI_BM_LEGACY?MARAJI_BM:current)?'selected':''}>${escape(f)}</option>`).join('');
   function bookForm(book=null) {
     const edit=!!book;
     const b=window.MAKTABAH_KHATAM.normalize(window.MAKTABAH_VOLUMES.normalize(book||{title:'',author:'',kind:'kitab',fann:'Belum Diklasifikasikan',total_pages:0,pdf_url:'',cover_url:'',notes:'',status:'belum'}));
